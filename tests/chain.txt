@@ -1,0 +1,52 @@
+new
+10 print "in prog2";a;b$;c
+20 c=c+1:print "c=";c
+save "prog2"
+new
+10 a=5:b$="hi":c=1
+20 common a,b$
+30 chain "prog2"
+run
+list
+new
+10 a=1:c=9:chain "prog2",20
+run
+new
+10 print "merged 10"
+save "m1",a
+new
+20 print "line 20"
+merge "m1"
+list
+run
+new
+100 print "merged";x:end
+save "m2",a
+new
+10 x=7
+20 chain merge "m2",100,all
+run
+list
+new
+10 x=8
+20 chain merge "m2",100,all,delete 10-15
+30 print "kept"
+run
+list
+new
+10 x=3:y$="s"
+20 chain "prog2",,all
+run
+new
+10 print "p"
+save "pp",p
+list
+load "pp"
+list
+run
+open "a",1,"app.txt":print #1,"one":close
+open "a",1,"app.txt":print #1,"two":close
+open "i",1,"app.txt":while not eof(1):line input #1,x$:print x$:wend:close
+chain "nofile"
+merge "nofile"
+kill "app.txt":kill "prog2.bas":kill "m1.bas":kill "m2.bas":kill "pp.bas"

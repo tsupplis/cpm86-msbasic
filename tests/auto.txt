@@ -1,0 +1,21 @@
+10 print "a"
+20 print "b"
+auto 200,5
+a=1
+b=2
+\r
+\k\c
+list
+auto 10,10
+\r
+print "new 20"
+\k\c
+list
+auto
+x=1
+\k\c
+list
+auto 205,5
+c=3
+\k\c
+list

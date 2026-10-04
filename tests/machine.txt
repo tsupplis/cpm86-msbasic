@@ -1,0 +1,16 @@
+dim a%(10):a%(0)=&HCBCB:a%(1)=&HCBCB:a%(2)=&H2CA:a%(3)=0:a%(4)=&H4CA:a%(5)=0
+print peek(varptr(a%(0)))
+poke varptr(a%(0))+2,&HC3:print peek(varptr(a%(0))+2)
+def seg
+def seg=0:print peek(&H410)>=0
+def seg
+def usr0=varptr(a%(0))
+x=usr0(5):print x
+p=varptr(a%(0)):call p
+q%=7:p2=varptr(a%(2)):call p2(q%):print q%
+p4=varptr(a%(4)):calls p4(q%):print q%
+print inp(&H61)>=0
+out &H80,1
+print "after wait"
+def fnx(z)=z+1:print fnx(2)
+print varptr(q%)>0

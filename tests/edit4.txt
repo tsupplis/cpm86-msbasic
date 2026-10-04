@@ -1,0 +1,31 @@
+10 abc=12:print abc
+edit 10
+3 hZZ\c
+q\c
+edit 10
+2d\c
+a\c
+q\c
+edit 10
+ab\eQ\c
+q\c
+edit 10
+\e\c
+q\c
+edit 10
+i\c
+\r
+list
+edit 10
+4 \c
+2 \c
+\d\d\c
+q\c
+edit 10
+10 \c
+ix\eE\c
+list
+10 abc
+edit 10
+xdef\r
+list

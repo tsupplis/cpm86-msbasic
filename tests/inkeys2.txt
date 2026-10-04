@@ -1,0 +1,6 @@
+print "ab\^H
+print "abc\^H\^H\dX"
+print "abc\^H\^R"
+print "abc\^H\^Ux"
+\^H\^Hprint 1
+print "a\^H\^H\^Hb"

@@ -1,0 +1,5 @@
+dostime.diff: emu2's MS-DOS emulation refuses to set the date and time
+(DOS 2Bh/2Dh return "invalid"), its CP/M-86 emulation accepts T_SET (104).
+BASIC issues the right call on each system; on real MS-DOS DATE$= works.
+errors.diff: ERR 57 reads "Disk I/O error" on CP/M-86 (BASIC-86 5.22
+wording) and "Device I/O Error" on MS-DOS (MBASIC 5.28 wording).

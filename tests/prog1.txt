@@ -1,0 +1,52 @@
+10 rem test
+20 for i=1 to 3
+30 print i
+40 next
+50 end
+renum 100,10,5
+list
+delete 100-105
+list
+200 a=1
+205 b=2
+210 c=3
+print a;b;c
+list
+tron
+10 print "x"
+run
+troff
+swap a,b:print a;b
+defint a-c:d=3.7:print d
+option base 1
+dim q(3):print q(1)
+erase q
+clear
+stop
+cont
+print 5
+10 for i=1 to 2:print "a";:stop
+run
+cont
+cont
+merge "nofile"
+chain "nofile"
+load "nofile"
+open "o",1,"con"
+lprint "x"
+width 40:print "wxyz" 
+print width
+a=len("abc"):on a goto 10,20
+1000 print "g":return
+gosub 1000
+return
+next
+wend
+print a$+1
+x=1:y=x/0
+print 1e38*10
+print "a" "b"
+print chr$(7)
+cls
+locate 1,1
+screen 1

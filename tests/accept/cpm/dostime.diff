@@ -1,0 +1,36 @@
+3c3
+< <num>
+---
+>  10           -             -
+6c6
+< <num>
+---
+>  8            :             :
+14c14
+< 1/2/20
+---
+> <date>
+16a17
+> Illegal function call
+21a23
+> Illegal function call
+28d29
+< Syntax error
+33d33
+< Syntax error
+36c36
+<  0  0  0  0  0  0  0  0  0  0 
+---
+>  0  1  4  9  16  25  36  49  64  81 
+39d38
+< Syntax error
+42c41
+<  0  0  0  0  0  0  0  0  0  0 
+---
+>  0  1  4  9  16  25  36  49  64  81 
+45c44
+< Syntax error
+---
+> File not found
+51d49
+< File not found

@@ -1,0 +1,19 @@
+print len(date$),mid$(date$,3,1),mid$(date$,6,1)
+print len(time$),mid$(time$,3,1),mid$(time$,6,1)
+d$=date$:t$=time$
+date$="01-02-2020":print date$
+date$="1/2/20":print date$
+date$="13-01-2020"
+time$="10:20:30":print left$(time$,5)
+time$="25:00:00"
+date$=d$:time$=t$
+dim a%(9):for i=0 to 9:a%(i)=i*i:next
+bsave "arr.bin",varptr(a%(0)),20
+for i=0 to 9:a%(i)=0:next
+bload "arr.bin",varptr(a%(0))
+for i=0 to 9:print a%(i);:next:print
+bload "arr.bin"
+for i=0 to 9:print a%(i);:next:print
+bload "nofile.bin"
+bsave "x.bin",0
+kill "arr.bin"

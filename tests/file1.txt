@@ -1,0 +1,23 @@
+10 open "o",1,"t1.dat":print#1,"line one":print#1,12,34:write#1,"q",5:close 1
+20 open "i",1,"t1.dat":while not eof(1):line input#1,a$:print "[";a$;"]":wend:close 1
+30 open "r",1,"t2.dat",16:field 1,8 as n$,8 as v$
+40 for i=1 to 3:lset n$="rec"+str$(i):lset v$=mki$(i*100)+"  ":put 1,i:next
+50 for i=3 to 1 step -1:get 1,i:print n$;cvi(v$):next:close 1
+60 input "name";x$:print "hi ";x$
+70 input a,b:print a+b
+run
+bob
+3,4
+save "prog1"
+new
+list
+load "prog1"
+list 10-20
+files "t*.*"
+kill "t1.dat"
+open "i",1,"t1.dat"
+name "t2.dat" as "t3.dat"
+files "t*.*"
+kill "t3.dat"
+kill "prog1.bas"
+files "t*.*"

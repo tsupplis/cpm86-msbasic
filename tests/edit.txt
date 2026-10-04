@@ -1,0 +1,35 @@
+10 print "hello world":rem tail
+edit 10
+q\c
+list
+edit 10
+e\c
+edit 10
+4 \c
+a\c
+\r
+edit 10
+6 \d\d\d\r
+edit 10
+3c123\r
+list
+edit 10
+i<<\eins\r
+edit 10
+5 i\d\d\eX\r
+list
+edit 10
+2kd\r
+list
+edit 10
+sq\r
+edit 10
+20d\r
+list
+edit 99
+edit
+edit .
+20 x=1:print x)
+run
+x\e\r
+list

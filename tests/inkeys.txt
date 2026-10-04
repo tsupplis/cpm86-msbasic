@@ -1,0 +1,16 @@
+print "abcx\^Hd"
+print "abcx\dd"
+print "abc\^Udef"
+print "abc\^Xdef"
+print "abc\^Rd"
+print "abcx\dx\d\^Rd"
+print "ab\^Jcd"
+print "a\^Ib"
+print "a\^Sb"
+print "a\^Ob"
+print "a\^Gb"
+print "a\^Eb"
+print "a\eb"
+input "q";a$\r
+xy\dz\^R
+print a$

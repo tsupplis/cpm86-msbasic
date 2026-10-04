@@ -1,0 +1,18 @@
+print 1+1
+rem hi
+x=5
+print x
+print "hello";2*3.5
+goto 100
+foo bar
+10 for i=1 to 3
+20 print i;
+30 next i
+40 print "done"
+list
+run
+print sqr(2),sin(1),exp(1)
+a$="abc":print a$+"def",len(a$),left$(a$,2),mid$(a$,2,1)
+print 10/3,10\3,10 mod 3,2^10
+print hex$(255),oct$(8),chr$(65),asc("A")
+print fre(0)

@@ -1,0 +1,41 @@
+10 rem keyword coverage for MBASIC 5.28
+20 defint i:defsng s:defdbl d:defstr t
+30 i=3:s=1.5:d=2.25:t="x":print i;s;d;t
+40 option base 0:dim a(5):a(1)=7:swap a(1),a(2):print a(2):erase a
+50 randomize 3:print rnd(1)>=0
+60 print sgn(-1);int(2.7);abs(-3);sqr(16);sin(0);cos(0);tan(0);atn(0);log(1);exp(0)
+70 print pos(0);len("ab");str$(3);val("4");asc("A");chr$(66)
+80 print space$(2);oct$(9);hex$(31);cint(1.6);csng(2);cdbl(3);fix(-1.5)
+90 print left$("abc",1);right$("abc",1);mid$("abc",2,1);instr("abc","c");string$(2,"z")
+100 x$=mki$(258):print cvi(x$);:y$=mks$(1.5):print cvs(y$);:z$=mkd$(2.5):print cvd(z$)
+110 print varptr(i)>0;lpos(0);inkey$;fre(0)>0
+120 def fna(q)=q+1:print fna(1)
+130 on 1 gosub 300:on 2 goto 140,150
+140 stop
+150 if 1 then print "then" else print "else"
+160 while i>0:i=i-1:wend:print i
+170 for k=1 to 2 step 1:next k:print k
+180 data 5:read r:restore:read r:print r
+190 on error goto 400:error 11
+200 print using "##.#";1.25
+210 write 1,"a"
+220 tron:troff
+230 null 0
+240 width 80
+250 lprint "";
+260 a$="hello":lset a$="x":rset a$="y":mid$(a$,1,1)="z":print a$
+270 print 7 mod 3;7\3;5 eqv 3;5 imp 3;not 0;1 and 3;1 or 2;1 xor 3
+280 end
+300 print "gosub":return
+400 print "err";err;erl:resume next
+run
+list 10-30
+llist 300
+renum 1000,10
+list 1000-1030
+delete 1000
+cont
+clear 1000
+print fre("")>0
+new
+print peek(0)>=0

@@ -1,0 +1,10 @@
+10 for i=1 to 30000:next:goto 10
+run
+\k\c
+cont
+\k\c
+20 input a
+run 20
+\k\c
+print "x\k\c
+print 1
