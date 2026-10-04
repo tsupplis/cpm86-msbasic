@@ -1505,6 +1505,7 @@ SCAN1:	JCXZ	FILSPC		;End of string
 	DEC	CX
 	CLD			;set Post-Increment mode
 	LODSB			;Get filename character
+	CALL	UPCASE		;CP/M file names are case sensitive
 	CMP	AL,LOW "*"	;filename can't have wildcard chars
 	JE	ERIFN1
 	CMP	AL,LOW "?"
