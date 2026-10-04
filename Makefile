@@ -173,11 +173,11 @@ run: prog
 	cd $(BLD) && emu2 $(PROG)
 
 # Flat archive (no directories): our two builds, the 5.28 / 5.22 reference
-# binaries under 8.3 names, the license and the README
+# binaries under 8.3 names and the license
 dist: all
 	rm -rf build/dist build/mbasic.zip
 	mkdir -p build/dist
-	cp build/dos/mbasic86.exe build/cpm/mbasic86.cmd LICENSE.md README.md build/dist/
+	cp build/dos/mbasic86.exe build/cpm/mbasic86.cmd LICENSE.md build/dist/
 	cp ref/mbasic86.com build/dist/mbas528.com
 	cp ref/mbasic86.cmd build/dist/mbas522.cmd
 	cd build/dist && zip -q ../mbasic.zip *
