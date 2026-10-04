@@ -19,6 +19,7 @@ one source tree producing an MS-DOS `.EXE` and a CP/M-86 `.CMD`.
 | Product | Year | CPU / OS | Relation |
 |---|---|---|---|
 | Altair BASIC | 1975 | 8080 | Origin of `BINTRP` ("Bill Gates and Paul Allen", Monte Davidoff math) |
+| BASIC Rev. 4.51 [CP/M Version] | 1977 | 8080 / CP/M-80 | Earlier CP/M release (banner: "Copyright 1977 (C) by Microsoft"), before the 5.x line and MBASIC.COM naming; not part of these sources, binary kept in `ref/` |
 | BASIC-80 (MBASIC) 5.21 | ~1981 | 8080 / CP/M-80 | Disk BASIC 5.x, the language MBASIC users know |
 | BASIC-86 5.22 | 1982 | 8086 / CP/M-86 | 5.x mechanically translated from 8080 to 8086 (headers: "translation created … by Version 4.3") |
 | MBASIC 5.28 | 1983 | 8086 / MS-DOS | Same 5.x line on MS-DOS; adds BLOAD/BSAVE, CALLS, DATE$, TIME$ |
@@ -96,6 +97,8 @@ limit (`tests/accept/parity`).
 |---|---|---|---|
 | `ref/mbasic86.com` | MBASIC 5.28 | MS-DOS | `make test` (DOS) |
 | `ref/mbasic86.cmd` | BASIC-86 5.22 | CP/M-86 | `make TARGET=cpm test` |
+| `ref/mbas521.com` | MBASIC 5.21 | CP/M-80 | reference only (not used by tests) |
+| `ref/obas451.com` | BASIC Rev. 4.51 | CP/M-80 | reference only (not used by tests) |
 
 ## 5. Build and test
 
@@ -107,7 +110,7 @@ limit (`tests/accept/parity`).
 | `make test` / `make TARGET=cpm test` | every `tests/*.txt` on reference and build, diff |
 | `make parity` | every test on both builds, diff |
 | `make DEBUG=1 …` | build with error tracing |
-| `make dist` | flat `build/mbasic.zip`: `mbasic86.exe`, `mbasic86.cmd`, reference `mbas528.com` (5.28) and `mbas522.cmd` (5.22), `LICENSE.md`, `README.md` |
+| `make dist` | flat `build/mbasic.zip`: `mbasic86.exe`, `mbasic86.cmd`, reference `mbas528.com` (5.28), `mbas522.cmd` (5.22), `mbas521.com` (5.21 CP/M-80), `obas451.com` (4.51 CP/M-80), `LICENSE.md` |
 | `make clean` | remove `build/` |
 
 | Layout | |
