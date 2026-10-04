@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Turn the linked MBASIC.EXE into a CP/M-86 compact model CMD file.
+"""Turn the linked MBASIC86.EXE into a CP/M-86 compact model CMD file.
 
 usage: mkcmd.py EXE MAP CMD
 

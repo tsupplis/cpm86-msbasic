@@ -3,4 +3,5 @@ build/
 *.lst
 *.obj
 *.map
-*.exe
+**/.*.swp
+**/.DS*

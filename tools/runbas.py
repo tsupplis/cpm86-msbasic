@@ -3,7 +3,7 @@ r"""Drive a DOS program under emu2 through a pseudo terminal.
 
 usage: runbas.py DIR PROGRAM FILE
   DIR      directory to run in (the flat build directory)
-  PROGRAM  program to start, e.g. mbasic.exe
+  PROGRAM  program to start, e.g. mbasic86.exe
   FILE     text file; each line is typed followed by CR, then SYSTEM is sent.
            Escapes: \^X control-X, \e ESC, \k CTRL-C, \b backspace, \d DEL, \r CR, \\ backslash; a line
            ending in \c is sent without the trailing CR. A first line

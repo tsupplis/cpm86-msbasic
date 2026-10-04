@@ -12,6 +12,7 @@ one source tree producing an MS-DOS `.EXE` and a CP/M-86 `.CMD`.
 | Source | [microsoft/GW-BASIC](https://github.com/microsoft/GW-BASIC) (1983, MIT) |
 | Result | MBASIC 5.50: everything MBASIC 5.28 does, nothing PC specific, Works on both DOS and CP/M |
 | Rule | May do more than 5.28 / 5.22, never less |
+| Manual | [docs/basic-5.0.pdf](docs/basic-5.0.pdf): BASIC-80 5.0 reference manual, also valid for this version (5.50 follows the 5.x language) |
 
 ### The family, as far as the sources tell
 
@@ -48,8 +49,8 @@ Quick start-up checks (banner, `FILES`, program entry) on PCE/ibmpc; not an exte
 
 | Binary | Size | Memory |
 |---|---|---|
-| `build/dos/mbasic.exe` | ~35 KB | 64 KB data segment |
-| `build/cpm/mbasic.cmd` | ~35 KB | code group + data group up to 64 KB |
+| `build/dos/mbasic86.exe` | ~35 KB | 64 KB data segment |
+| `build/cpm/mbasic86.cmd` | ~35 KB | code group + data group up to 64 KB |
 
 ## 3. Feature parity
 
@@ -89,18 +90,24 @@ limit (`tests/accept/parity`).
 | cpm86-crossdev | https://github.com/tsupplis/cpm86-crossdev | `pcdev_masm` (MASM 5.10), `pcdev_link` (LINK 3.65a), `cmdinfo` |
 | emu2-cpm86 | https://github.com/johnsonjh/emu2-cpm86 | runs the DOS tools, both builds and the reference BASICs |
 | GNU make, python3, unix2dos | host | build scripts, test driver, CMD packer |
-| Reference binaries | `ref/` | MBASIC 5.28 (DOS), BASIC-86 5.22 (CP/M-86) as test oracles |
+| Reference binaries | `ref/` | test oracles, see below |
+
+| Reference binary | Version | Target | Used by |
+|---|---|---|---|
+| `ref/mbasic86.com` | MBASIC 5.28 | MS-DOS | `make test` (DOS) |
+| `ref/mbasic86.cmd` | BASIC-86 5.22 | CP/M-86 | `make TARGET=cpm test` |
 
 ## 5. Build and test
 
 | Command | Does |
 |---|---|
 | `make` | both targets |
-| `make dos` / `make cpm` | one target (`build/dos/mbasic.exe`, `build/cpm/mbasic.cmd`) |
+| `make dos` / `make cpm` | one target (`build/dos/mbasic86.exe`, `build/cpm/mbasic86.cmd`) |
 | `make run` / `make TARGET=cpm run` | start the interpreter under emu2 |
 | `make test` / `make TARGET=cpm test` | every `tests/*.txt` on reference and build, diff |
 | `make parity` | every test on both builds, diff |
 | `make DEBUG=1 …` | build with error tracing |
+| `make dist` | flat `build/mbasic.zip`: `mbasic86.exe`, `mbasic86.cmd`, reference `mbas528.com` (5.28) and `mbas522.cmd` (5.22), `LICENSE.md`, `README.md` |
 | `make clean` | remove `build/` |
 
 | Layout | |
@@ -115,6 +122,7 @@ limit (`tests/accept/parity`).
 | Idea | Note |
 |---|---|
 | Extensive testing on real DOS 1.10 / CP/M-86 1.1 / Concurrent DOS | start-up checked, full `tests/` not yet run there |
+| `.COM` build for DOS | like 5.28 (31,744 B `.COM`); saves the 512 B `.EXE` header, but the start-up segment setup must change |
 | LINK 5.10b | currently rejects the object set; LINK 3.65a used |
 | Exact file lengths on CP/M 3 (LRBC) | binary files end on 128-byte records today |
 | 8087 support, more devices | only if it stays OS-generic |

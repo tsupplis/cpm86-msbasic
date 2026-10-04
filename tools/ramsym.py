@@ -1,7 +1,7 @@
 import re,sys
 import os
 bld=os.environ.get('BLD','build/dos')
-m=open(bld+'/mbasic.map').read().replace('\r','')
+m=open(bld+'/mbasic86.map').read().replace('\r','')
 S={}
 for l in m.split('\n'):
     mm=re.match(r'\s*([0-9A-F]{4}):([0-9A-F]{4})\s+(?:Abs\s+)?(\S+)',l)
