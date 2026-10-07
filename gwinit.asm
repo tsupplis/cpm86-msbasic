@@ -2,7 +2,7 @@
 
 	.RADIX  8		; To be safe
 
-CSEG	SEGMENT PUBLIC 'CODESG' 
+CSEG	SEGMENT BYTE PUBLIC 'CODESG' 
 	ASSUME  CS:CSEG
 
 INCLUDE	OEM.INC
@@ -45,6 +45,7 @@ DSEG	ENDS
 	EXTRN	SNERR:NEAR,FCERR:NEAR,ATN:NEAR,COS:NEAR
 DSEG	SEGMENT PUBLIC 'DATASG'
 	EXTRN	MSWFLG:WORD,MSWSIZ:WORD,NEWDS:WORD
+	EXTRN	FREFLG:WORD,NORFLG:WORD,CPMMEM:WORD
 DSEG	ENDS
 	EXTRN	MAPCLC:NEAR,MAPINI:NEAR
 	EXTRN	INITSA:NEAR
@@ -69,7 +70,7 @@ INIT:
 ;
 IF	CPM86
 ;CP/M-86 loaded the data group at DS, with the base page at DS:0.  The word at
-; base page offset 2 (CPMMEM) becomes the paragraph just past the data group.
+; last paragraph of the data group goes to CPMMEM (not into the base page).
 	MOV	DX,DS
 	MOV	ES,DX
 	MOV	AX,WORD PTR DS:6	;data group length (24 bits at 6..8)
@@ -82,7 +83,7 @@ IF	CPM86
 	OR	AH,CH
 	ADD	AX,DX		;first paragraph past the data group
 	DEC	AX		;last paragraph we own
-	MOV	WORD PTR DS:2,AX	;CPMMEM
+	MOV	CPMMEM,AX
 ELSE
 	EXTRN	BEGDSG:NEAR	;Beg. of the data segment, offset from CS
 	INS86	272,,BEGDSG	;MOVI DX,BEGDSP
@@ -177,9 +178,6 @@ DSEG	ENDS
 ;       /S:<MAX RECORD SIZE>
 ;       /C:<COM INPUT QUEUE SIZE>
 ;
-DSEG	SEGMENT PUBLIC 'DATASG'
-	EXTRN	CPMMEM:WORD
-DSEG	ENDS
 	MOV	BX,CPMMEM	;Load bytes free within segment
 ;For DYNCOM, CPMMEM holds the last segment addr of the system(i.e. CPMMEM=2)
 	EXTRN	SEGOFF:NEAR
@@ -191,8 +189,21 @@ DSEG	SEGMENT PUBLIC 'DATASG'
 DSEG	ENDS
 	MOV	BX,OFFSET DSEGZ	;IN THE DATA SEGMENT
 	MOV	TEMP8,BX	;SO IF RE-INITAILIZE OK
+IF	CPM86
+;Parse a copy of the command tail (base page 80h-FFh) in the upper half of
+; BUF, above the start-up stack, so the base page stays as CP/M-86 built it.
+	PUSH	DS
+	POP	ES
+	MOV	SI,128D
+	MOV	DI,OFFSET BUF+128D
+	MOV	CX,128D
+	CLD
+ REP	MOVSB
+	TBUFF	EQU	BUF+128D
+ELSE
 	EXTRN	CPMWRM:NEAR
 	TBUFF	EQU	CPMWRM+128D	;WHERE CP/M COMMAND BUFFER IS LOCATED
+ENDIF
 
 	MOV	BX,OFFSET TBUFF	;POINT TO FIRST CHAR OF COMMAND BUFFER
 	MOV	AL,BYTE PTR [BX]	;WHICH CONTAINS # OF CHARS IN COMMAND
@@ -240,6 +251,8 @@ SCANS1:
 	JZ	SHORT WASS
 	CMP	AL,LOW "F"	;FILES OPTION
 	JZ	SHORT WASF
+	CMP	AL,LOW "N"	;/NOBANNER or /NORUN
+	JZ	SHORT WASN
 	CMP	AL,LOW "M"	;MEMORY OPTION
 	JZ	SHORT ??L002
 	JMP	SNERR		;Branch if couldn't recognize option
@@ -259,6 +272,39 @@ WASS:				;GIO has dynamic record size
 WASF:				;GIO has dynamic number of files
 	CALL	GETVAL		;Get value
 	JMP	SHORT FOK	;Any value OK (and ignored)
+
+;/NOB[ANNER] sets FREFLG, /NOR[UN] sets NORFLG.  Any prefix of the word down
+;to three letters is accepted.
+WASN:	INC	BX
+	CALL	MAKUPL
+	CMP	AL,LOW "O"
+	JNE	NOERR
+	INC	BX
+	CALL	MAKUPL
+	MOV	SI,OFFSET NOBTXT
+	MOV	DI,OFFSET FREFLG
+	CMP	AL,LOW "B"
+	JE	NOMAT
+	MOV	SI,OFFSET NORTXT
+	MOV	DI,OFFSET NORFLG
+	CMP	AL,LOW "R"
+	JNE	NOERR
+NOMAT:	INC	SI		;third letter matched
+NOLP:	INC	BX
+	CALL	MAKUPL
+	CMP	AL,LOW "A"
+	JB	NOEND
+	CMP	AL,LOW "Z"
+	JA	NOEND
+	CMP	AL,BYTE PTR CS:[SI]
+	JNE	NOERR		;not the option's spelling (or too long)
+	INC	SI
+	JMP	SHORT NOLP
+NOEND:	MOV	BYTE PTR [DI],LOW 377O
+	JMP	FOK
+NOERR:	JMP	SNERR
+NOBTXT:	DB	"BANNER",0
+NORTXT:	DB	"RUN",0
 
 GETVAL:	CALL	CHRGTR		;skip M,F or S
 	CALL	SYNCHR
@@ -377,12 +423,8 @@ SMLSTK:	MOV	AL,DL		;SUBTRACT STACK SIZE FROM TOP MEM
 	MOV	BX,TXTTAB
 	XCHG	BX,DX
 	CALL	REASON
-DSEG	SEGMENT PUBLIC 'DATASG'
-	EXTRN	FREFLG:WORD	;Print free bytes flag
-DSEG	ENDS
-	XOR	AL,AL
-	MOV	BYTE PTR FREFLG,AL	;Clear to print free bytes message
-				;(always, as MBASIC 5.28, even with a program)
+	TEST	BYTE PTR FREFLG,LOW 377O	;/NOBANNER?
+	JNZ	PRNTND		;heading and BYTES FREE both skipped
 	MOV	BX,OFFSET HEDING	;GET HEADING ("BASIC VERSION...")
 	CALL	STROUT		;PRINT IT
 PRNTND:

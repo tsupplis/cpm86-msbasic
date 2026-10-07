@@ -1,0 +1,9 @@
+10 open "o",1,"seq.dat":print #1,"one";2;"three":write #1,"a,b",3.5,"c":print #1,"line, with comma":close
+20 open "i",1,"seq.dat":input #1,a$,b,c$:print a$;b;c$:input #1,x$,y,z$:print x$;y;z$
+30 line input #1,l$:print l$:print eof(1):close
+40 open "i",1,"seq.dat":print input$(5,#1):close
+50 open "i",1,"seq.dat":n=0:while not eof(1):line input #1,l$:n=n+1:print n;l$:wend:close
+60 open "i",1,"seq.dat":for i=1 to 4:line input #1,l$:next
+70 close:kill "seq.dat"
+run
+open "i",1,"nofile.dat"

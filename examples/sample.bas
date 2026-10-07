@@ -1,0 +1,1 @@
+00010 PRINT "This is an example of BASIC-80"

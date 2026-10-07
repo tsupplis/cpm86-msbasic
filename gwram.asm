@@ -2,7 +2,7 @@
 
 	.RADIX  8		; To be safe
 
-CSEG	SEGMENT PUBLIC 'CODESG' 
+CSEG	SEGMENT BYTE PUBLIC 'CODESG' 
 	ASSUME  CS:CSEG
 
 INCLUDE	OEM.INC
@@ -19,7 +19,7 @@ COMMENT	*
 
 	PUBLIC	HEDING,CERMSG
 
-HEDING:	DB	"Microsoft BASIC Version 5.50"
+HEDING:	DB	"Microsoft BASIC Version 5.50A"
 	ACRLF	
 	DB	"Copyright 1977-2026 (C) by Microsoft"
 	ACRLF	
@@ -51,7 +51,12 @@ NAME	LABEL	WORD
 	DB	VALUE
 ENDM
 
-	VARI	FREFLG,0	;non-zero: don't print the BYTES FREE message
+IF	CPM86
+	VAR	CPMMEM,2	;last paragraph of the data group (the base
+				;page is left as CP/M-86 built it)
+ENDIF
+	VARI	FREFLG,0	;non-zero: /NOBANNER, no heading nor BYTES FREE
+	VARI	NORFLG,0	;non-zero: /NORUN, LOAD the command line program
 	VARI	INITFG,0	;non-zero once initialisation is complete
 	VARI	SEMFLG,0	;non-zero: INPUT; (no CRLF at end of input)
 	VAR	LINLEN,1	;console width

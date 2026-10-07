@@ -2,7 +2,7 @@
 
 	.RADIX  8		; To be safe
 
-CSEG	SEGMENT PUBLIC 'CODESG' 
+CSEG	SEGMENT BYTE PUBLIC 'CODESG' 
 	ASSUME  CS:CSEG
 
 INCLUDE	OEM.INC
@@ -144,12 +144,11 @@ FNDWN2:
 FNDWN3:	MOV	CX,OFFSET $WHILE
 	CMP	AL,CL
 	JZ	SHORT $+3
-	RET
+??R001:	RET
 	INS86	71,27		;CMP [BX],DX-SAME WEND?
 	MOV	CX,OFFSET WHLSIZ-1	;Note that the pointer has
 				;already been incremented once.
-	JNZ	SHORT $+3
-	RET			;RETURN IF ENTRY MATCHES
+	JZ	??R001		;was JNZ $+3 / RET
 	ADD	BX,CX
 	JMP	SHORT FNDWN2
 
@@ -375,9 +374,7 @@ LPBKNC:	MOV	SI,CX
 	MOV	AL,[SI]		;Back up until plus byte
 	DEC	CX
 	OR	AL,AL
-	JNS	SHORT ??L007
-	JMP	LPBKNC
-??L007:
+	JS	LPBKNC		;was JNS ??L007 / JMP
 				;Now point to 2nd char of var name
 	MOV	SI,CX
 	MOV	AL,[SI]		;set COMMON bit
@@ -446,9 +443,7 @@ CLPSLP:	CMP	BX,DX		;Are we done?
 	ADD	BX,CX
 	POPF			;Get indicator whether to delete
 	POP	CX		;Pointer to where var started
-	JNS	SHORT ??L011
-	JMP	CLPSLP
-??L011:
+	JS	CLPSLP		;was JNS ??L011 / JMP
 	PUSH	CX		;This is where we will resume scanning vars later
 	CALL	VARDLS		;Delete variable
 	MOV	BX,ARYTAB	;Now correct ARYTAB by # of bytes deleted
@@ -502,9 +497,7 @@ CLPAKP:	CMP	BX,DX		;Done?
 	ADD	BX,CX		;[H,L] now points after array
 	POPF			;Get back COMMON indicator
 	POP	CX		;Get pointer to start of array
-	JNS	SHORT ??L012
-	JMP	CLPAKP		;COMMON, dont delete!
-??L012:
+	JS	CLPAKP		;was JNS ??L012 / JMP
 	PUSH	CX		;Save so we can resume
 	CALL	VARDLS		;Delete the array
 	XCHG	BX,DX		;Returns with STREND in HL, so put in DE
@@ -561,20 +554,17 @@ CDVARS:
 	INC	BX
 	INC	BX
 	OR	AL,AL		;Set CC's on length
-	JNZ	SHORT $+3
-	RET			;Ignore null strings
+	JZ	??R002		;was JNZ $+3 / RET
 	PUSH	BX		;Save where we are
 	MOV	BX,VARTAB	;Is string in program text or disk buffers?
 	CMP	BX,DX		;Compare
 	POP	BX		;Restore where we are
-	JNB	SHORT $+3
-	RET			;No, must be in string space
+	JB	??R002		;was JNB $+3 / RET
 	PUSH	BX		;save where we are again.
 	MOV	BX,TXTTAB	;is it in buffers?
 	CMP	BX,DX		;test
 	POP	BX		;Restore where we are
-	JNAE	SHORT $+3
-	RET			;in buffers, do nothing
+	JAE	??R002		;was JNAE $+3 / RET
 	PUSH	BX		;Save where we are for nth time
 	DEC	BX		;Point to start of descriptor
 	DEC	BX
@@ -585,7 +575,7 @@ CDVARS:
 	MOV	CH,LOW 3	;# of bytes to move
 	CALL	MOVE1		;Move em
 	POP	BX		;Where we are
-	RET	
+??R002:	RET	
 ; Step 5 - Move stuff up into string space!
 DNCCLS:
 	CALL	GARBA2		;Get rid of unused strings
@@ -773,9 +763,7 @@ DSEG	ENDS
 	MOV	AL,BYTE PTR [BX]	;[A]=device id
 	OR	AL,AL		;if disk [A] will be 0..n
 	POP	BX
-	JNS	SHORT ??L016
-	JMP	NTRNDW		;branch if special device ([A] is negative)
-??L016:
+	JS	NTRNDW		;was JNS ??L016 / JMP
 	PUSH	BX
 	MOV	CX,OFFSET F_MODE
 	ADD	BX,CX		;HL points to File Mode Byte in FDB

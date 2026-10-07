@@ -70,16 +70,16 @@ Quick start-up checks (banner, `FILES`, program entry) on PCE/ibmpc; not an exte
 | SAVE ,P (protected: `FE` header, XOR-encoded; LIST/EDIT/PEEK/POKE/binary SAVE blocked) | ✔ | ✔ | ✔ own tokens | ✔ files interchangeable with 5.28 both ways |
 | EDIT line editor (D C S K I X H L A E Q) | ✔ | ✔ | full screen | ✔ MBASIC style |
 | AUTO, RENUM, DELETE, TRON/TROFF, NULL | ✔ | ✔ | ✔ (no NULL) | ✔ |
-| Correct file case handling (legacy of CP/M implementation) | ✘ | ✔ | ✔ | ✔ |
 | Input keys ^U ^X ^R ^O, rubout `\x\`, ^C/^S | ✔ | ✔ | screen keys | ✔ |
 | Device names KYBD: SCRN: LPT1: | ✘ | partial | ✔ | ✔ |
 | Division by zero trappable by ON ERROR | ✘ | ✔ | ✔ | ✔ |
 | ERR 57 message | "Disk I/O error" | "Device I/O Error" | "Device I/O Error" | CP/M-86: "Disk I/O error", DOS: "Device I/O Error" |
 | ERR 68 message | Unprintable error | Unprintable error | "Device Unavailable" | "Device Unavailable" (device names) |
+| Command line `/F:` `/S:` `/M:` | ✔ | ✔ | ✔ | ✔ (`/F:` `/S:` accepted, ignored: files and records are dynamic) |
+| Command line `/NOB[ANNER]` (no banner, no "Bytes free"), `/NOR[UN]` (load the program, don't run it) | ✘ | ✘ | ✘ | ✔ e.g. `mbasic86 pspdump /nob` |
 | Graphics, sound, CLS/LOCATE/COLOR/SCREEN, KEY | ✘ | ✘ | ✔ | ✘ removed |
 | COM:, light pen, joystick, cassette, events (ON KEY…) | ✘ | ✘ | ✔ | ✘ removed |
 | CHDIR/MKDIR/SHELL/ENVIRON, VARPTR$, Kanji | ✘ | ✘ | ✔ | ✘ removed |
-
 
 Verification: identical to 5.28 (DOS) and 5.22 (CP/M-86) on all `tests/`
 scripts except the reviewed extras in `tests/accept/dos` and `tests/accept/cpm`;
@@ -111,6 +111,7 @@ limit (`tests/accept/parity`).
 | `make run` / `make TARGET=cpm run` | start the interpreter under emu2 |
 | `make test` / `make TARGET=cpm test` | every `tests/*.txt` on reference and build, diff |
 | `make parity` | every test on both builds, diff |
+| `make testall` | the three suites (dos, cpm, parity) in parallel, logs in `build/test-*.log`, PASS/FAIL summary |
 | `make DEBUG=1 …` | build with error tracing |
 | `make dist` | flat `build/mbasic.zip`: `mbasic86.com`, `mbasic86.cmd`, reference `mbas528.com` (5.28), `mbas522.cmd` (5.22), `mbas521.com` (5.21 CP/M-80), `obas451.com` (4.51 CP/M-80), `LICENSE.md` |
 | `make clean` | remove `build/` |
@@ -121,6 +122,7 @@ limit (`tests/accept/parity`).
 | `giotty.asm`, `oemio.asm` | teletype console, line editor, OS primitives |
 | `tools/` | `runbas.py` test driver, `mkcom.py` EXE→COM, `mkcmd.py` EXE→CMD, `normout.sh` |
 | `tests/` | scripts (`\k` ^C, `\e` ESC, `\^X` control keys, first line `#args:` = command line, `NAME.bas` companion file), `accept/` reviewed differences |
+| `examples/` | `ivtdump.bas`: 8086 interrupt vector table (`DEF SEG=0`, `PEEK`); `pspdump.bas`: MS-DOS PSP / CP/M-86 base page at BASIC's DS:0 (`DEF SEG`, `PEEK`); `beep.bas`: PC speaker beep (`OUT`, `INP`, PC hardware only). emu2 shows placeholder vectors; real values on real hardware |
 
 ## 6. Possible evolution
 

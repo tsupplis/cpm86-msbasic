@@ -1,0 +1,9 @@
+1c1,6
+< Syntax error
+---
+> Ok
+> list
+> 10 PRINT "MUST NOT RUN"
+> 20 PRINT 6*7
+> Ok
+> SYSTEM

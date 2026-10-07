@@ -1,0 +1,20 @@
+10 dim a(10):on error goto 200
+20 error 200
+30 print "resumed next"
+40 a(11)=1
+50 print "back at 50"
+60 x=sqr(-1):print "after sqr"
+70 open "i",1,"nofile.dat"
+80 print "after open"
+90 error 255
+100 on error goto 0
+110 print "handler off"
+120 error 13
+130 print "not reached"
+200 print "err";err;"erl";erl
+210 if err=9 then resume 50
+220 resume next
+run
+resume
+error 30
+print err;erl

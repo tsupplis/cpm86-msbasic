@@ -1,0 +1,14 @@
+a$="hello world":mid$(a$,7,5)="WORLD":print a$
+mid$(a$,1)="J":print a$
+mid$(a$,10,9)="XYZ":print a$
+print instr(3,"abcabc","c");instr("abc","");instr("","a");instr(4,"abc","c")
+print left$("abc",0);"|";right$("abc",5);"|";mid$("abc",5);"|";mid$("abc",2);"|"
+b$=string$(255,"x"):print len(b$)
+c$=b$+"y"
+print len("a"+chr$(0)+"b");asc(chr$(0))
+print asc("")
+10 dim s$(9):for i=1 to 300:s$(i mod 10)=string$(100,65+i mod 26):next
+20 print s$(3);fre("")>0:print len(s$(0))
+run
+x$="b":y$="ab":print x$>y$;x$+y$;y$+x$
+print string$(3,65);space$(0);"|";str$(0);"|"

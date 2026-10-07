@@ -44,7 +44,7 @@ INCS    = oem bintrp ibmres gio86u msdosu cfg
 OBJS    = $(addprefix $(BLD)/,$(addsuffix .obj,$(MODS)))
 STAGED  = $(addprefix $(BLD)/,$(addsuffix .asm,$(MODS)) $(addsuffix .inc,$(INCS)))
 
-.PHONY: all dos cpm objs exe prog run check dump refcheck compare accept test parity dist clean distclean FORCE
+.PHONY: all dos cpm objs exe prog run check dump refcheck compare accept test parity parity-run testall dist clean distclean FORCE
 .SUFFIXES:
 .SECONDARY:
 
@@ -70,6 +70,8 @@ PROG     = mbasic86.com
 REFPROG  = ref/mbasic86.com
 endif
 REFDIR   = build/ref$(TARGET)
+# Transcripts and diffs, one directory per suite so suites can run in parallel
+OUT      = build/out$(TARGET)
 prog: $(BLD)/$(PROG)
 
 $(BLD)/mbasic86.com: $(BLD)/mbasic86.exe tools/mkcom.py
@@ -134,34 +136,56 @@ refcheck:
 # were reviewed (5.50 doing more than the reference) are recorded in
 # tests/accept/<target>/<test>.diff and accepted.
 compare: prog
-	mkdir -p $(REFDIR) && cp $(REFPROG) $(REFDIR)/
-	python3 tools/runbas.py $(REFDIR) $(notdir $(REFPROG)) $(TESTS) | tools/normout.sh > build/ref.out
-	python3 tools/runbas.py $(BLD) $(PROG) $(TESTS) | tools/normout.sh > build/ours.out
-	diff build/ref.out build/ours.out > build/diff.out; \
+	mkdir -p $(REFDIR) $(OUT) && cp $(REFPROG) $(REFDIR)/
+	python3 tools/runbas.py $(REFDIR) $(notdir $(REFPROG)) $(TESTS) | tools/normout.sh > $(OUT)/ref.out
+	python3 tools/runbas.py $(BLD) $(PROG) $(TESTS) | tools/normout.sh > $(OUT)/ours.out
+	diff $(OUT)/ref.out $(OUT)/ours.out > $(OUT)/diff.out; \
 	 acc=tests/accept/$(TARGET)/$(notdir $(TESTS:.txt=.diff)); \
-	 if [ ! -s build/diff.out ]; then echo "compare: identical ($(TESTS))"; \
-	 elif [ -f $$acc ] && cmp -s build/diff.out $$acc; then echo "compare: reviewed differences ($(TESTS))"; \
-	 else cat build/diff.out; exit 1; fi
+	 if [ ! -s $(OUT)/diff.out ]; then echo "compare $(TARGET): identical ($(TESTS))"; \
+	 elif [ -f $$acc ] && cmp -s $(OUT)/diff.out $$acc; then echo "compare $(TARGET): reviewed differences ($(TESTS))"; \
+	 else echo "compare $(TARGET): DIFFERENT ($(TESTS))"; cat $(OUT)/diff.out; exit 1; fi
 
 # Same behaviour on both targets: run every test on our MS-DOS and our CP/M-86
 # build and diff the two transcripts (banner, free memory and clock masked).
+# The programs run in their own directories (build/pardos, build/parcpm) so
+# parity can run alongside the dos and cpm suites.
 parity:
 	$(MAKE) --no-print-directory TARGET=dos prog
 	$(MAKE) --no-print-directory TARGET=cpm prog
+	$(MAKE) --no-print-directory parity-run
+
+parity-run:
+	mkdir -p build/pardos build/parcpm build/outpar
+	cp build/dos/mbasic86.com build/pardos/
+	cp build/cpm/mbasic86.cmd build/parcpm/
 	rc=0; for t in tests/*.txt; do \
-	  python3 tools/runbas.py build/dos mbasic86.com $$t | tools/normout.sh > build/par-dos.out; \
-	  python3 tools/runbas.py build/cpm mbasic86.cmd $$t | tools/normout.sh > build/par-cpm.out; \
+	  python3 tools/runbas.py build/pardos mbasic86.com $$t | tools/normout.sh > build/outpar/dos.out; \
+	  python3 tools/runbas.py build/parcpm mbasic86.cmd $$t | tools/normout.sh > build/outpar/cpm.out; \
 	  acc=tests/accept/parity/$$(basename $$t .txt).diff; \
-	  if diff build/par-dos.out build/par-cpm.out > build/par.diff; then echo "parity: same      $$t"; \
-	  elif [ -f $$acc ] && cmp -s build/par.diff $$acc; then echo "parity: reviewed  $$t"; \
-	  else echo "parity: DIFFERENT $$t"; cat build/par.diff; rc=1; fi; \
+	  if diff build/outpar/dos.out build/outpar/cpm.out > build/outpar/diff.out; then echo "parity: same      $$t"; \
+	  elif [ -f $$acc ] && cmp -s build/outpar/diff.out $$acc; then echo "parity: reviewed  $$t"; \
+	  else echo "parity: DIFFERENT $$t"; cat build/outpar/diff.out; rc=1; fi; \
+	done; exit $$rc
+
+# All three suites at once (dos vs 5.28, cpm vs 5.22, dos vs cpm), one log
+# each in build/, printed when all are done.  About a third of the time of
+# running them one after the other.
+testall: all
+	rc=0; \
+	$(MAKE) -s --no-print-directory TARGET=dos test > build/test-dos.log 2>&1 & p1=$$!; \
+	$(MAKE) -s --no-print-directory TARGET=cpm test > build/test-cpm.log 2>&1 & p2=$$!; \
+	$(MAKE) -s --no-print-directory parity-run > build/test-par.log 2>&1 & p3=$$!; \
+	wait $$p1; r1=$$?; wait $$p2; r2=$$?; wait $$p3; r3=$$?; \
+	cat build/test-dos.log build/test-cpm.log build/test-par.log; \
+	for x in "dos:$$r1" "cpm:$$r2" "parity:$$r3"; do \
+	  if [ "$${x#*:}" = 0 ]; then echo "testall: $${x%:*} PASS"; else echo "testall: $${x%:*} FAIL"; rc=1; fi; \
 	done; exit $$rc
 
 # Record the current differences of TESTS as reviewed (after checking them!)
 accept: prog
 	mkdir -p tests/accept/$(TARGET)
 	$(MAKE) --no-print-directory compare TESTS=$(TESTS) >/dev/null 2>&1; \
-	 cp build/diff.out tests/accept/$(TARGET)/$(notdir $(TESTS:.txt=.diff)); \
+	 cp $(OUT)/diff.out tests/accept/$(TARGET)/$(notdir $(TESTS:.txt=.diff)); \
 	 echo "accepted: $(TESTS) ($(TARGET))"
 
 # Run every tests/*.txt script against the reference and diff the results

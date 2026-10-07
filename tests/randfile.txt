@@ -1,0 +1,11 @@
+10 open "r",1,"rnd.dat",20
+20 field #1,10 as n$,4 as a$,6 as b$
+30 for i=1 to 3:lset n$="name"+str$(i):lset a$=mki$(i*100):rset b$=str$(i):put #1,i:next
+40 print loc(1)
+50 get #1,2:print n$;cvi(a$);b$;loc(1)
+60 get #1:print n$;cvi(a$);b$;loc(1)
+70 lset n$="longer than ten chars":print n$;"|"
+80 close:open "r",1,"rnd.dat",20:field #1,20 as r$:get #1,1:print len(r$);left$(r$,6)
+90 get #1,9:print asc(r$)
+100 close:kill "rnd.dat"
+run
