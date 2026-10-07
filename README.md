@@ -70,6 +70,7 @@ Quick start-up checks (banner, `FILES`, program entry) on PCE/ibmpc; not an exte
 | SAVE ,P (protected: `FE` header, XOR-encoded; LIST/EDIT/PEEK/POKE/binary SAVE blocked) | ✔ | ✔ | ✔ own tokens | ✔ files interchangeable with 5.28 both ways |
 | EDIT line editor (D C S K I X H L A E Q) | ✔ | ✔ | full screen | ✔ MBASIC style |
 | AUTO, RENUM, DELETE, TRON/TROFF, NULL | ✔ | ✔ | ✔ (no NULL) | ✔ |
+| Correct file case handling (legacy of CP/M implementation) | ✘ | ✔ | ✔ | ✔ |
 | Input keys ^U ^X ^R ^O, rubout `\x\`, ^C/^S | ✔ | ✔ | screen keys | ✔ |
 | Device names KYBD: SCRN: LPT1: | ✘ | partial | ✔ | ✔ |
 | Division by zero trappable by ON ERROR | ✘ | ✔ | ✔ | ✔ |
@@ -78,6 +79,7 @@ Quick start-up checks (banner, `FILES`, program entry) on PCE/ibmpc; not an exte
 | Graphics, sound, CLS/LOCATE/COLOR/SCREEN, KEY | ✘ | ✘ | ✔ | ✘ removed |
 | COM:, light pen, joystick, cassette, events (ON KEY…) | ✘ | ✘ | ✔ | ✘ removed |
 | CHDIR/MKDIR/SHELL/ENVIRON, VARPTR$, Kanji | ✘ | ✘ | ✔ | ✘ removed |
+
 
 Verification: identical to 5.28 (DOS) and 5.22 (CP/M-86) on all `tests/`
 scripts except the reviewed extras in `tests/accept/dos` and `tests/accept/cpm`;
