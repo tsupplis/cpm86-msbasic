@@ -2,7 +2,7 @@
 
 A text-mode Microsoft BASIC interpreter rebuilt from the 1983 GW-BASIC sources:
 graphics and PC hardware removed, tokens and behaviour aligned on MBASIC 5.28,
-one source tree producing an MS-DOS `.EXE` and a CP/M-86 `.CMD`.
+one source tree producing an MS-DOS `.COM` and a CP/M-86 `.CMD`.
 
 ## 1. Why and what
 
@@ -50,7 +50,7 @@ Quick start-up checks (banner, `FILES`, program entry) on PCE/ibmpc; not an exte
 
 | Binary | Size | Memory |
 |---|---|---|
-| `build/dos/mbasic86.exe` | ~35 KB | 64 KB data segment |
+| `build/dos/mbasic86.com` | ~34 KB | 64 KB data segment |
 | `build/cpm/mbasic86.cmd` | ~35 KB | code group + data group up to 64 KB |
 
 ## 3. Feature parity
@@ -105,19 +105,19 @@ limit (`tests/accept/parity`).
 | Command | Does |
 |---|---|
 | `make` | both targets |
-| `make dos` / `make cpm` | one target (`build/dos/mbasic86.exe`, `build/cpm/mbasic86.cmd`) |
+| `make dos` / `make cpm` | one target (`build/dos/mbasic86.com`, `build/cpm/mbasic86.cmd`) |
 | `make run` / `make TARGET=cpm run` | start the interpreter under emu2 |
 | `make test` / `make TARGET=cpm test` | every `tests/*.txt` on reference and build, diff |
 | `make parity` | every test on both builds, diff |
 | `make DEBUG=1 …` | build with error tracing |
-| `make dist` | flat `build/mbasic.zip`: `mbasic86.exe`, `mbasic86.cmd`, reference `mbas528.com` (5.28), `mbas522.cmd` (5.22), `mbas521.com` (5.21 CP/M-80), `obas451.com` (4.51 CP/M-80), `LICENSE.md` |
+| `make dist` | flat `build/mbasic.zip`: `mbasic86.com`, `mbasic86.cmd`, reference `mbas528.com` (5.28), `mbas522.cmd` (5.22), `mbas521.com` (5.21 CP/M-80), `obas451.com` (4.51 CP/M-80), `LICENSE.md` |
 | `make clean` | remove `build/` |
 
 | Layout | |
 |---|---|
 | `*.asm`, `*.inc` | interpreter (MASM 5.10), `oem.inc` switches, `cfg.inc` generated per target |
 | `giotty.asm`, `oemio.asm` | teletype console, line editor, OS primitives |
-| `tools/` | `runbas.py` test driver, `mkcmd.py` EXE→CMD, `normout.sh` |
+| `tools/` | `runbas.py` test driver, `mkcom.py` EXE→COM, `mkcmd.py` EXE→CMD, `normout.sh` |
 | `tests/` | scripts (`\k` ^C, `\e` ESC, `\^X` control keys, first line `#args:` = command line, `NAME.bas` companion file), `accept/` reviewed differences |
 
 ## 6. Possible evolution
@@ -125,7 +125,6 @@ limit (`tests/accept/parity`).
 | Idea | Note |
 |---|---|
 | Extensive testing on real DOS 1.10 / CP/M-86 1.1 / Concurrent DOS | start-up checked, full `tests/` not yet run there |
-| `.COM` build for DOS | like 5.28 (31,744 B `.COM`); saves the 512 B `.EXE` header, but the start-up segment setup must change |
 | LINK 5.10b | currently rejects the object set; LINK 3.65a used |
 | Exact file lengths on CP/M 3 (LRBC) | binary files end on 128-byte records today |
 | 8087 support, more devices | only if it stays OS-generic |

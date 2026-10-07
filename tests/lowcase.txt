@@ -1,0 +1,9 @@
+save "lower"
+files "lower.*"
+load "lower"
+name "lower.bas" as "lower2.bas"
+files "lower2.*"
+open "o",1,"lower2.bas"
+close
+kill "lower2.bas"
+files "lower*"

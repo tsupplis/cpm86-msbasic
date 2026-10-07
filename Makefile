@@ -51,7 +51,7 @@ STAGED  = $(addprefix $(BLD)/,$(addsuffix .asm,$(MODS)) $(addsuffix .inc,$(INCS)
 all: dos cpm
 
 dos:
-	$(MAKE) --no-print-directory TARGET=dos exe
+	$(MAKE) --no-print-directory TARGET=dos prog
 
 cpm:
 	$(MAKE) --no-print-directory TARGET=cpm prog
@@ -60,16 +60,20 @@ objs: $(OBJS)
 
 exe: $(BLD)/mbasic86.exe
 
-# The program for the target: MBASIC86.EXE on MS-DOS, MBASIC86.CMD on CP/M-86
+# The program for the target: MBASIC86.COM on MS-DOS, MBASIC86.CMD on CP/M-86,
+# both made from the linked MBASIC86.EXE
 ifeq ($(TARGET),cpm)
 PROG     = mbasic86.cmd
 REFPROG  = ref/mbasic86.cmd
 else
-PROG     = mbasic86.exe
+PROG     = mbasic86.com
 REFPROG  = ref/mbasic86.com
 endif
 REFDIR   = build/ref$(TARGET)
 prog: $(BLD)/$(PROG)
+
+$(BLD)/mbasic86.com: $(BLD)/mbasic86.exe tools/mkcom.py
+	python3 tools/mkcom.py $(BLD)/mbasic86.exe $@
 
 $(BLD)/mbasic86.cmd: $(BLD)/mbasic86.exe tools/mkcmd.py
 	python3 tools/mkcmd.py $(BLD)/mbasic86.exe $(BLD)/mbasic86.map $@
@@ -145,7 +149,7 @@ parity:
 	$(MAKE) --no-print-directory TARGET=dos prog
 	$(MAKE) --no-print-directory TARGET=cpm prog
 	rc=0; for t in tests/*.txt; do \
-	  python3 tools/runbas.py build/dos mbasic86.exe $$t | tools/normout.sh > build/par-dos.out; \
+	  python3 tools/runbas.py build/dos mbasic86.com $$t | tools/normout.sh > build/par-dos.out; \
 	  python3 tools/runbas.py build/cpm mbasic86.cmd $$t | tools/normout.sh > build/par-cpm.out; \
 	  acc=tests/accept/parity/$$(basename $$t .txt).diff; \
 	  if diff build/par-dos.out build/par-cpm.out > build/par.diff; then echo "parity: same      $$t"; \
@@ -177,7 +181,7 @@ run: prog
 dist: all
 	rm -rf build/dist build/mbasic.zip
 	mkdir -p build/dist
-	cp build/dos/mbasic86.exe build/cpm/mbasic86.cmd LICENSE.md build/dist/
+	cp build/dos/mbasic86.com build/cpm/mbasic86.cmd LICENSE.md build/dist/
 	cp ref/mbasic86.com build/dist/mbas528.com
 	cp ref/mbasic86.cmd build/dist/mbas522.cmd
 	cp ref/mbas521.com ref/obas451.com build/dist/

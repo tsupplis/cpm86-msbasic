@@ -11,11 +11,14 @@ INCLUDE BINTRP.INC
 ;data may live there. CPMWRM marks it: command tail at CPMWRM+128.
 PUBLIC	CPMWRM
 CPMWRM:
-IF	CPM86
 	EXTRN	BIBOOT:NEAR
+IF	CPM86
 	JMP	BIBOOT		;CP/M-86 starts a program at CS:0000
 ENDIF
 	ORG	256D
+IFE	CPM86
+	JMP	BIBOOT		;MS-DOS starts a .COM program at CS:0100
+ENDIF
 
 	TITLE	GWMAIN Copied from BINTRP.MAC
 
