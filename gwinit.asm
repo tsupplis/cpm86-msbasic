@@ -176,7 +176,7 @@ DSEG	ENDS
 ;       /M:<TOPMEM>
 ;       /F:<FILES>
 ;       /S:<MAX RECORD SIZE>
-;       /C:<COM INPUT QUEUE SIZE>
+;       /NOBANNER, /NORUN
 ;
 	MOV	BX,CPMMEM	;Load bytes free within segment
 ;For DYNCOM, CPMMEM holds the last segment addr of the system(i.e. CPMMEM=2)

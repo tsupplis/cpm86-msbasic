@@ -173,7 +173,7 @@ CSEND:
 
 ;MAPCLC - Calculate the final memory map limits.
 ;Entry  - MSWFLG = Flag nonzero when /M: option exists
-;         MSWSIZ = /C: option size
+;         MSWSIZ = /M: option size
 ;Exit   - NEWDS  = Final DS: address
 ;         MSWSIZ = Highest memory address (future MAXMEM)
 ;
