@@ -264,9 +264,22 @@ SCANS1:
 FOK:	DEC	BX		;RESCAN LAST CHAR
 	CALL	CHRGTR		;BY CALLING CHRGET
 	JZ	SHORT DONCMD	;END OF COMMAND
+	CMP	AL,LOW OFFSET SWTCHR	;another option?
+	JNE	CMDFIL		;no: the file name follows the options
 	CALL	SYNCHR
 	DB	OFFSET SWTCHR	;SLASH SHOULD FOLLOW
 	JMP	SHORT SCANS1	;SCAN NEXT SWITCH
+;5.50: the file name may also come after options (mbasic /nob prog).
+; Only one file name: TEMP8 still points to the 0 terminator if none yet.
+CMDFIL:	MOV	SI,TEMP8
+	CMP	BYTE PTR [SI],LOW 0
+	JE	CMDFL1
+	JMP	SNERR		;second file name
+CMDFL1:	DEC	BX		;the byte before the name was consumed
+	MOV	BYTE PTR [BX],LOW 34	;STORE DOUBLE QUOTE
+	MOV	TEMP8,BX	;SAVE POINTER TO START OF FILE NAME
+	INC	BX
+	JMP	ISSLH		;scan the name up to the next option
 
 WASS:				;GIO has dynamic record size
 WASF:				;GIO has dynamic number of files

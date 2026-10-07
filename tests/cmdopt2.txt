@@ -1,0 +1,2 @@
+#args: /nob /nor cmdopt2
+list
