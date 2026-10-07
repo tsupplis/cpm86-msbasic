@@ -53,7 +53,21 @@ Quick start-up checks (banner, `FILES`, program entry) on PCE/ibmpc; not an exte
 | `build/dos/mbasic86.com` | ~34 KB | 64 KB data segment |
 | `build/cpm/mbasic86.cmd` | ~35 KB | code group + data group up to 64 KB |
 
-## 3. Feature parity
+## 3. Command line
+
+`mbasic86 [file] [options]`: the optional program file is loaded and run, options start with `/` and may come before or after the file name (only one file name allowed). Anything else gives "Error detected in command line".
+
+| Option | Effect |
+|---|---|
+| `/F:n` | Number of files: accepted for compatibility, ignored (files are dynamic) |
+| `/S:n` | Maximum record size: accepted for compatibility, ignored (records are dynamic) |
+| `/M:n` | Limit the data segment to n bytes (decimal or `&H` hex), e.g. `/M:&HC000` leaves 46922 bytes free instead of 63290; more than is available is refused |
+| `/NOB[ANNER]` | No banner and no "Bytes free" message (5.50 extension) |
+| `/NOR[UN]` | Load the program but do not run it, stay at `Ok` (5.50 extension) |
+
+Option names are case-insensitive and may be abbreviated down to three letters (`/NOB`, `/NOR`). Examples: `mbasic86 pspdump`, `mbasic86 /nob /nor pspdump`, `mbasic86 prog /m:&HC000`.
+
+## 4. Feature parity
 
 | Area | 5.22 CP/M-86 | 5.28 DOS | GW-BASIC | 5.50 |
 |---|---|---|---|---|
@@ -86,7 +100,7 @@ scripts except the reviewed extras in `tests/accept/dos` and `tests/accept/cpm`;
 both builds identical to each other except ERR 57's wording and an emulator
 limit (`tests/accept/parity`).
 
-## 4. Dependencies
+## 5. Dependencies
 
 | What | Where | Used for |
 |---|---|---|
@@ -102,7 +116,7 @@ limit (`tests/accept/parity`).
 | `ref/mbas521.com` | MBASIC 5.21 | CP/M-80 | reference only (not used by tests) |
 | `ref/obas451.com` | BASIC Rev. 4.51 | CP/M-80 | reference only (not used by tests) |
 
-## 5. Build and test
+## 6. Build and test
 
 | Command | Does |
 |---|---|
@@ -124,7 +138,7 @@ limit (`tests/accept/parity`).
 | `tests/` | scripts (`\k` ^C, `\e` ESC, `\^X` control keys, first line `#args:` = command line, `NAME.bas` companion file), `accept/` reviewed differences |
 | `examples/` | `ivtdump.bas`: 8086 interrupt vector table (`DEF SEG=0`, `PEEK`); `pspdump.bas`: MS-DOS PSP / CP/M-86 base page at BASIC's DS:0 (`DEF SEG`, `PEEK`); `beep.bas`: PC speaker beep (`OUT`, `INP`, PC hardware only). emu2 shows placeholder vectors; real values on real hardware |
 
-## 6. Possible evolution
+## 7. Possible evolution
 
 | Idea | Note |
 |---|---|
@@ -133,7 +147,7 @@ limit (`tests/accept/parity`).
 | Exact file lengths on CP/M 3 (LRBC) | binary files end on 128-byte records today |
 | 8087 support, more devices | only if it stays OS-generic |
 
-## 7. Fun facts and quirks (found in the 1983 code)
+## 8. Fun facts and quirks (found in the 1983 code)
 
 | Finding | Where |
 |---|---|
