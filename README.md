@@ -1,8 +1,10 @@
 # MBASIC 5.50 — BASIC-86 for MS-DOS and CP/M-86
 
-A text-mode Microsoft BASIC interpreter rebuilt from the 1983 GW-BASIC sources:
-graphics and PC hardware removed, tokens and behaviour aligned on MBASIC 5.28,
+A text-mode Microsoft BASIC interpreter rebuilt from the 1983 GW-BASIC sources specifically for FCB DOS and CP/M-86 family:
+graphics and PC hardware removed, tokens and behaviour aligned on MBASIC 5.28/ MBASIC-86 5.22.
 one source tree producing an MS-DOS `.COM` and a CP/M-86 `.CMD`.
+
+A similar  but far more advanced approach can also be found at [gw-basic-2026](https://github.com/evvaletov/gw-basic-2026). If you intent to work on *nix and more recent ms-dos environment, have a look at it.
 
 ## 1. Why and what
 
