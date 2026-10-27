@@ -168,7 +168,7 @@ limit (`tests/accept/parity`).
 | The `USR` "undefined slot" check is hand-assembled in octal (`INS86 203,372` + `DB 377O` = `CMP DX,-1`); BASIC-86 5.22 got it wrong as a byte compare (`80 FA FF`) | `gweval.asm` `USRFN` |
 | `NULL n` still sends n NUL characters after each line — padding for mechanical teletypes that need time to return the carriage | `bimisc.asm` `NULL` |
 
-## Companion projects
+--
 
 ## Companion projects
 
@@ -185,6 +185,12 @@ limit (`tests/accept/parity`).
 | [cpm86-menu](https://github.com/tsupplis/cpm86-menu)   | A submit replacement and a menu system for submit orchestration for CP/M-86 |
 | [cpm86-make](https://github.com/tsupplis/cpm86-make)   | A simple submit based make tool for CP/M-86 |
 | [pcdos11-hacking](https://github.com/tsupplis/pcdos11-hacking) | PC-DOS 1.1 distribution, tools and notes |
+
+--
+
+## License
+
+The whole repository is under MIT [License](LICENSE.md) unless specified otherwise in a subdirectory.
 
 --
 
