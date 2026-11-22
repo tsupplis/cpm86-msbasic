@@ -6,6 +6,8 @@ one source tree producing an MS-DOS `.COM` and a CP/M-86 `.CMD`.
 
 A similar  but far more advanced approach can also be found at [gw-basic-2026](https://github.com/evvaletov/gw-basic-2026). If you intent to work on *nix and more recent ms-dos environment, have a look at it.
 
+Another interesting project is [mbasic 5.21 reconstruction](https://github.com/avwohl/mbasic2025).
+
 ## 1. Why and what
 
 | | |
