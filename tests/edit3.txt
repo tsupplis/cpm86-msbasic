@@ -48,4 +48,4 @@ l\c
 q\c
 edit 10
 ab\eQ\c
-q\c
+q

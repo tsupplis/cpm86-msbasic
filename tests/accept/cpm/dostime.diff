@@ -1,17 +1,25 @@
 3c3
-< <num>
+<  0                          
 ---
 >  10           -             -
 6c6
-< <num>
+<  0                          
 ---
 >  8            :             :
+11c11
+< 01-02-2020
+---
+> <date>
 14c14
 < 1/2/20
 ---
 > <date>
 16a17
 > Illegal function call
+19c20
+< 10:20
+---
+> <time>
 21a23
 > Illegal function call
 28d29

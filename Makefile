@@ -142,18 +142,26 @@ check: prog
 # The same session on the reference MBASIC 5.28 (ref/mbasic86.com)
 refcheck:
 	mkdir -p $(REFDIR) && cp $(REFPROG) $(REFDIR)/
-	python3 tools/runbas.py $(REFDIR) $(notdir $(REFPROG)) $(TESTS)
+	python3 tools/runbas.py $(REFDIR) $(notdir $(REFPROG)) $(TESTS) $(ref_options)
 
 # Diff our session against the reference (MBASIC 5.28 for dos, 5.22 for cpm),
 # ignoring the sign-on banner, free memory and the clock.  Differences that
 # were reviewed (5.50 doing more than the reference) are recorded in
 # tests/accept/<target>/<test>.diff and accepted.
-compare: prog
+# Save raw output first so a failed runner cannot be masked by the filter.
+transcript = python3 tools/runbas.py $(1) $(2) $(3) $(5) > $(4).raw && tools/normout.sh $(6) < $(4).raw > $(4)
+# Both reference binaries reject these newer startup options before the prompt.
+ref_options = $(if $(filter cmdopts.txt cmdopt2.txt,$(notdir $(TESTS))),--expect-option-error)
+
+.PHONY: transcripts
+transcripts: prog
 	mkdir -p $(REFDIR) $(OUT) && cp $(REFPROG) $(REFDIR)/
-	python3 tools/runbas.py $(REFDIR) $(notdir $(REFPROG)) $(TESTS) | tools/normout.sh > $(OUT)/ref.out
-	python3 tools/runbas.py $(BLD) $(PROG) $(TESTS) | tools/normout.sh > $(OUT)/ours.out
-	diff $(OUT)/ref.out $(OUT)/ours.out > $(OUT)/diff.out; \
-	 acc=tests/accept/$(TARGET)/$(notdir $(TESTS:.txt=.diff)); \
+	$(call transcript,$(REFDIR),$(notdir $(REFPROG)),$(TESTS),$(OUT)/ref.out,$(ref_options))
+	$(call transcript,$(BLD),$(PROG),$(TESTS),$(OUT)/ours.out,,$(if $(filter cpm/dostime.txt,$(TARGET)/$(notdir $(TESTS))),cpm-dostime))
+	diff $(OUT)/ref.out $(OUT)/ours.out > $(OUT)/diff.out || test $$? -eq 1
+
+compare: transcripts
+	@acc=tests/accept/$(TARGET)/$(notdir $(TESTS:.txt=.diff)); \
 	 if [ ! -s $(OUT)/diff.out ]; then echo "compare $(TARGET): identical ($(TESTS))"; \
 	 elif [ -f $$acc ] && cmp -s $(OUT)/diff.out $$acc; then echo "compare $(TARGET): reviewed differences ($(TESTS))"; \
 	 else echo "compare $(TARGET): DIFFERENT ($(TESTS))"; cat $(OUT)/diff.out; exit 1; fi
@@ -172,11 +180,11 @@ parity-run:
 	cp build/dos/mbasic86.com build/pardos/
 	cp build/cpm/mbasic86.cmd build/parcpm/
 	rc=0; for t in tests/*.txt; do \
-	  python3 tools/runbas.py build/pardos mbasic86.com $$t | tools/normout.sh > build/outpar/dos.out; \
-	  python3 tools/runbas.py build/parcpm mbasic86.cmd $$t | tools/normout.sh > build/outpar/cpm.out; \
+	  $(call transcript,build/pardos,mbasic86.com,$$t,build/outpar/dos.out) || exit 1; \
+	  $(call transcript,build/parcpm,mbasic86.cmd,$$t,build/outpar/cpm.out,,$$(if [ "$$t" = tests/dostime.txt ]; then echo cpm-dostime; fi)) || exit 1; \
 	  acc=tests/accept/parity/$$(basename $$t .txt).diff; \
 	  if diff build/outpar/dos.out build/outpar/cpm.out > build/outpar/diff.out; then echo "parity: same      $$t"; \
-	  elif [ -f $$acc ] && cmp -s build/outpar/diff.out $$acc; then echo "parity: reviewed  $$t"; \
+	  elif [ $$? -eq 1 ] && [ -f $$acc ] && cmp -s build/outpar/diff.out $$acc; then echo "parity: reviewed  $$t"; \
 	  else echo "parity: DIFFERENT $$t"; cat build/outpar/diff.out; rc=1; fi; \
 	done; exit $$rc
 
@@ -195,11 +203,10 @@ testall: all
 	done; exit $$rc
 
 # Record the current differences of TESTS as reviewed (after checking them!)
-accept: prog
+accept: transcripts
 	mkdir -p tests/accept/$(TARGET)
-	$(MAKE) --no-print-directory compare TESTS=$(TESTS) >/dev/null 2>&1; \
-	 cp $(OUT)/diff.out tests/accept/$(TARGET)/$(notdir $(TESTS:.txt=.diff)); \
-	 echo "accepted: $(TESTS) ($(TARGET))"
+	cp $(OUT)/diff.out tests/accept/$(TARGET)/$(notdir $(TESTS:.txt=.diff))
+	@echo "accepted: $(TESTS) ($(TARGET))"
 
 # Run every tests/*.txt script against the reference and diff the results
 test: prog

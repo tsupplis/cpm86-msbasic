@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 r"""Drive a DOS program under emu2 through a pseudo terminal.
 
-usage: runbas.py DIR PROGRAM FILE
+usage: runbas.py DIR PROGRAM FILE [--expect-option-error]
   DIR      directory to run in (the flat build directory)
   PROGRAM  program to start, e.g. mbasic86.exe
   FILE     text file; each line is typed followed by CR, then SYSTEM is sent.
@@ -12,7 +12,7 @@ usage: runbas.py DIR PROGRAM FILE
 
 The terminal output is written to stdout with CRLF turned into LF.
 """
-import os, pty, select, signal, sys, time
+import errno, os, pty, select, signal, sys, time
 
 def keys(line):
     out, i, cr = bytearray(), 0, True
@@ -58,40 +58,79 @@ def main():
 
     def rd(dur):
         nonlocal out
-        end = time.time() + dur
-        while time.time() < end:
+        end = time.monotonic() + dur
+        while time.monotonic() < end:
             r, _, _ = select.select([fd], [], [], 0.05)
             if r:
                 try:
                     d = os.read(fd, 4096)
-                except OSError:
-                    return False
+                except OSError as exc:
+                    if exc.errno == errno.EIO:  # PTY closed by child
+                        return False
+                    raise
                 if not d:
                     return False
                 out += d
         return True
 
-    alive = rd(1.0)
-    for l in lines + ['SYSTEM']:
-        if not alive:
-            break
-        chunks = keys(l).split(b'\x1b')
-        for n, part in enumerate(chunks):
-            if n:
-                os.write(fd, b'\x1b')
-                rd(0.4)            # let emu2 see ESC on its own
-            if part:
-                os.write(fd, part)
-        alive = rd(0.5)
-    rd(1.0)
     try:
-        os.kill(pid, signal.SIGKILL)
-    except OSError:
-        pass
-    try:
-        os.waitpid(pid, 0)
-    except OSError:
-        pass
+        alive = rd(1.0)
+        for l in lines:
+            if not alive:
+                break
+            chunks = keys(l).split(b'\x1b')
+            for n, part in enumerate(chunks):
+                if n:
+                    os.write(fd, b'\x1b')
+                    rd(0.4)            # let emu2 see ESC on its own
+                if part:
+                    os.write(fd, part)
+            alive = rd(0.5)
+        if alive:
+            # Only executed BASIC can produce this complete output line.
+            marker = b'MBASIC-SESSION-COMPLETE'
+            command = b'PRINT "MBASIC-SESSION-";"COMPLETE"'
+            before = len(out)
+            os.write(fd, command + b'\r')
+            deadline = time.monotonic() + 5
+            while marker not in out[before:].replace(b'\r', b'').split(b'\n'):
+                if time.monotonic() >= deadline or not rd(0.1):
+                    sys.exit('runner: missing BASIC completion marker')
+            # Drain the completion command's Ok prompt before sending SYSTEM.
+            if not rd(0.2):
+                sys.exit('runner: early exit after completion marker')
+            echo = out.find(command, before)
+            if echo < 0:
+                sys.exit('runner: completion command was not echoed')
+            out = out[:echo]
+            os.write(fd, b'SYSTEM\r')
+            if rd(5):
+                sys.exit('runner: BASIC did not exit')
+        elif not ('--expect-option-error' in sys.argv[4:] and
+                  out.strip() == b'Syntax error'):
+            sys.exit('runner: emulator exited before the script finished')
+        deadline = time.monotonic() + 5
+        while True:
+            child, status = os.waitpid(pid, os.WNOHANG)
+            if child:
+                break
+            if time.monotonic() >= deadline:
+                sys.exit('runner: emulator did not terminate')
+            time.sleep(0.01)
+        pid = None
+        if os.waitstatus_to_exitcode(status) != 0:
+            sys.exit('runner: emulator terminated unsuccessfully')
+    except (SystemExit, OSError):
+        sys.stderr.write(out[-2000:].decode('cp437'))
+        raise
+    finally:
+        os.close(fd)
+        if pid is not None:
+            try:
+                os.kill(pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            os.waitpid(pid, 0)
     if os.environ.get('RAW'):
         for l in out.split(b'\n'):
             print(repr(l))
