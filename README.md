@@ -1,4 +1,4 @@
-# MBASIC 5.50B — BASIC-86 for MS-DOS and CP/M-86
+# MBASIC 5.50B — ROM-able BASIC-86 for MS-DOS and CP/M-86
 
 A text-mode Microsoft BASIC interpreter rebuilt from the 1983 GW-BASIC sources specifically for FCB DOS and CP/M-86 family:
 graphics and PC hardware removed, tokens and behaviour aligned on MBASIC 5.28/ MBASIC-86 5.22.
