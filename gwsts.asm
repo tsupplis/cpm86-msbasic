@@ -163,7 +163,13 @@ PRSDAT:
 	CALL	FRESTR
 	MOV	CL,BYTE PTR 0[BX]	;Save string len in [CL]
 	CMP	CL,LOW 1	;String must not be null
-	JB	DATERR		;Brif null str
+	IF CPM86
+	JNB DATEARG
+	JMP DATERR
+DATEARG:
+ELSE
+	JB DATERR
+ENDIF
 	MOV	SI,WORD PTR 1[BX]	;[SI] has addr of string.
 	MOV	BL,CL		;Working reg for string len.
 	CALL	GNUM8		;[AX]=month
@@ -172,7 +178,14 @@ PRSDAT:
 	CALL	GNUM8		;[AL]=day of month
 	MOV	DL,AL		;[DL] = day
 	CALL	DATSEP		;skip / or -
+	IF CPM86
+	CALL	NEEDDIG
+ENDIF
 	CALL	GNUM16		;[AX]=year (16 BITS)
+IF CPM86
+	OR BL,BL
+	JNZ DATERR
+ENDIF
 	CMP	AX,1978D
 	JNB	DATE2		;branch if .GE. 1978
 	CMP	AX,100D
@@ -214,6 +227,9 @@ GNUML:	CALL	DIGIT		;[CX]=0..9
 	MUL	DX		;[AX]=[AX]*10
 	JO	DATERR		;branch if overflow
 	ADD	AX,CX		;add in new digit
+IF CPM86
+	JC DATERR
+ENDIF
 	JMP	SHORT GNUML
 GNUMX:	POP	DX
 	POP	CX
@@ -300,7 +316,8 @@ YEARSL:	CALL	CKLEAP		;[AX]=1 if CX is leap-year
 	ADD	BX,AX		;days=days+1 if leap-lear
 YEARS1:	ADD	BX,365D		;days=days+365
 	LOOPNZ	YEARSL
-YEARSX:	MOV	WORD PTR DATIME,BX	;DATIME=count of days since 1/1/1978
+YEARSX:	INC	BX		;BDOS day 1 is 1978-01-01
+	MOV	WORD PTR DATIME,BX	;DATIME=count of days since 1/1/1978
 	CALL	SDTIME		;set current date/time from DATIME
 	POP	BX		;restore text pointer
 	RET	
@@ -310,7 +327,11 @@ YEARSX:	MOV	WORD PTR DATIME,BX	;DATIME=count of days since 1/1/1978
 ;
 GETDAT:	CALL	GDTIME		;get current date/time into DATIME
 	MOV	DX,WORD PTR DATIME	;[DX]=no of days since JAN 1,1978
-	MOV	CX,0		;years=0
+	DEC	DX
+	CMP	DX,44559D	;last day of 2099, measured from day zero
+	JBE	DATEOK
+	JMP	FCERR
+DATEOK:	MOV	CX,0		;years=0
 FNDYR:	CALL	CKLEAP		;[AX]=1 if leap-year
 	ADD	AX,365D		;[AX]=366 if leap-year
 	CMP	DX,AX
@@ -408,6 +429,9 @@ PRSTIM:
 	JB	TIMERR		;Brif null str
 	MOV	SI,WORD PTR 1[BX]	;[SI] has addr of string.
 	MOV	BL,CL		;Working reg for string len.
+	IF CPM86
+	CALL NEEDDIG
+ENDIF
 	CALL	GNUM8		;[AX]=hours
 	CMP	AL,LOW 24D
 	JNB	TIMERR
@@ -426,6 +450,10 @@ PRSTIM:
 	CALL	GNUM8
 	CMP	AL,LOW 100D
 	JNB	TIMERR
+	IF CPM86
+	OR BL,BL
+	JNZ TIMERR
+ENDIF
 	MOV	DL,AH		;[DL] = 100ths.
 	POP	BX		;Text pointer
 	RET			;Exit.
@@ -437,9 +465,18 @@ TIMSEP:
 	CLD			;Set to increment
 	LODSB
 	CMP	AL,LOW ":"
-	JZ	TIMSXX
+	JZ	TIMFIELD
 	CMP	AL,LOW "."
 	JNZ	TIMERR
+TIMFIELD:
+IF CPM86
+NEEDDIG: OR BL,BL
+	JZ TIMERR
+	CMP BYTE PTR [SI],"0"
+	JB TIMERR
+	CMP BYTE PTR [SI],"9"
+	JA TIMERR
+ENDIF
 TIMSXX:
 	RET	
 
@@ -497,7 +534,11 @@ GDTIME:	CALL	CLKCHK		;no clock: Illegal function call
 	PUSH	DX
 	CLD			;Because of Melco BIOS Bug
 	MOV	DX,OFFSET DATIME
-	CPMXIO	155D		;CPM86 system call
+	MOV BYTE PTR DATIME+4,0FFH
+	CPMXIO	105D		;T_GET returns packed BCD seconds in AL
+	CMP BYTE PTR DATIME+4,0FFH	;some BDOS variants fill all five bytes
+	JNE SDTIMX
+	MOV	BYTE PTR DATIME+4,AL
 	JMP	SHORT SDTIMX
 
 ;SDTIME sets the system clock to DATIME

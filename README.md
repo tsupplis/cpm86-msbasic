@@ -1,4 +1,4 @@
-# MBASIC 5.50 — BASIC-86 for MS-DOS and CP/M-86
+# MBASIC 5.50B — BASIC-86 for MS-DOS and CP/M-86
 
 A text-mode Microsoft BASIC interpreter rebuilt from the 1983 GW-BASIC sources specifically for FCB DOS and CP/M-86 family:
 graphics and PC hardware removed, tokens and behaviour aligned on MBASIC 5.28/ MBASIC-86 5.22.
@@ -14,7 +14,7 @@ Another interesting project is [mbasic 5.21 reconstruction](https://github.com/a
 |---|---|
 | Why | Fun, nostalgia and history: get a working, buildable Microsoft BASIC-86 back from published source |
 | Source | [microsoft/GW-BASIC](https://github.com/microsoft/GW-BASIC) (1983, MIT) |
-| Result | MBASIC 5.50: everything MBASIC 5.28 does, nothing PC specific, Works on both DOS and CP/M |
+| Result | MBASIC 5.50B: everything MBASIC 5.28 does, nothing PC specific, Works on both DOS and CP/M |
 | Rule | May do more than 5.28 / 5.22, never less |
 | Manual | [docs/basic-5.0.pdf](docs/basic-5.0.pdf): BASIC-80 5.0 reference manual, also valid for this version (5.50 follows the 5.x language) |
 
@@ -28,7 +28,7 @@ Another interesting project is [mbasic 5.21 reconstruction](https://github.com/a
 | BASIC-86 5.22 | 1982 | 8086 / CP/M-86 | 5.x mechanically translated from 8080 to 8086 (headers: "translation created … by Version 4.3") |
 | MBASIC 5.28 | 1983 | 8086 / MS-DOS | Same 5.x line on MS-DOS; adds BLOAD/BSAVE, CALLS, DATE$, TIME$ |
 | GW-BASIC | 1983 | 8086 / MS-DOS | Same translated core + generalized I/O (GIO), screen editor, graphics, sound, events |
-| **MBASIC 5.50** (this) | 2026 | 8086 / MS-DOS, CP/M-86 | GW-BASIC core minus PC specifics, 5.28 tokens and behaviour, teletype console |
+| **MBASIC 5.50B** (this) | 2026 | 8086 / MS-DOS, CP/M-86 | GW-BASIC core minus PC specifics, 5.28 tokens and behaviour, teletype console |
 
 ## 2. Runs on
 
@@ -47,10 +47,28 @@ Quick start-up checks (banner, `FILES`, program entry) on PCE/ibmpc; not an exte
 |---|---|---|
 | MS-DOS / PC-DOS 1.10+ | ✔ checked on PC-DOS 1.10 | Only DOS 1.x calls (00h–2Eh), FCB files, 8.3 names, no paths |
 | MS-DOS 2.x–6.x | ✔  checked on MS-DOS 6.22 | Same binary |
-| CP/M-86 1.1 (BDOS 2.2) | ✔ checked | DATE$/TIME$ → "Illegal function call" (no clock) |
-| CP/M-86 Plus, Concurrent CP/M / DOS, DOS Plus (BDOS 3.x, 4.1) | ✔ checked on Concurrent DOS 4.1 and DOS Plus 1.2 (`.CMD`) | DATE$/TIME$ via BDOS 155/104 |
+| CP/M-86 1.1 (BDOS 2.2) | ✔ checked | DATE$/TIME$ → "Illegal function call" (no BDOS clock API) |
+| Personal CP/M-86 2.0 | Clock tested in PCE | BDOS 105 read / 104 write |
+| Concurrent CP/M-86 1.0 and 3.1, Concurrent DOS 3.2, 4.1 and XM 6.21 | Clock tested in PCE | Same interface |
+| DOS Plus 1.2 | Clock tested in PCE | Minute-resolution writes |
+| CP/M-86 Plus | Separate guest unverified | Requires compatible BDOS 105/104 services |
 | Any 8086/8088 machine | ✔ | No BIOS, video or port access by the interpreter |
 | emu2-cpm86 (DOS and CP/M-86) | ✔ fully tested | All `tests/` run here |
+
+On the tested clock-capable guests, `DATE$` accepts dates from 1978 through
+2099. BDOS day 1 is January 1, 1978. `TIME$` reads hours, minutes and
+seconds. Setting either value writes the combined BDOS timestamp: a date
+assignment preserves hours and minutes, a time assignment preserves the date,
+and the OS resets seconds to zero. Inline BASIC programs can observe the
+clock ticking normally across midnight.
+
+To repeat the clock checks, run
+`python3 tests/clockpce.py CONFIG BOOT DATA minute` with a system disk
+and a data floppy containing the current `MBASIC86.CMD` on B:.
+Use `unsupported` for CP/M-86 1.1, `--program-drive a` for a program on the
+boot floppy, or `--hard-disk` for an XM hard-disk boot configuration.
+The harness copies both images before starting PCE and checks literal
+BASIC values, error messages and the year transition at midnight.
 
 | Binary | Size | Memory |
 |---|---|---|
@@ -73,7 +91,7 @@ Option names are case-insensitive and may be abbreviated down to three letters (
 
 ## 4. Feature parity
 
-| Area | 5.22 CP/M-86 | 5.28 DOS | GW-BASIC | 5.50 |
+| Area | 5.22 CP/M-86 | 5.28 DOS | GW-BASIC | 5.50B |
 |---|---|---|---|---|
 | Tokens (tokenised programs interchangeable) | 131 keywords | 136 keywords | own numbering | **5.28 numbering, 136** |
 | Core language, math, strings, PRINT USING, arrays, DEF FN | ✔ | ✔ | ✔ | ✔ |
@@ -81,9 +99,9 @@ Option names are case-insensitive and may be abbreviated down to three letters (
 | Sequential/random files, FIELD/LSET, FILES/KILL/NAME | ✔ | ✔ | ✔ | ✔ |
 | OPEN "A" (append) | ✘ | ✔ | ✔ | ✔ |
 | BLOAD/BSAVE, CALLS | ✘ | ✔ | ✔ | ✔ |
-| DATE$, TIME$ | ✘ (plain variables) | ✔ | ✔ | ✔ (CP/M: BDOS 3.x) |
+| DATE$, TIME$ | ✘ | ✔ | ✔ | ✔ |
 | PEEK/POKE/DEF SEG/USR/CALL/INP/OUT/WAIT | ✔ | ✔ | ✔ | ✔ (WAIT breakable with ^C) |
-| `USR` "undefined" check (slot = `FFFF`) | ✘ byte compare `CMP DL,0FFh`: `DEF USR` address `&HxxFF` gives "Illegal function call" | ✔ word compare | ✔ word compare | ✔ word compare, both targets |
+| USR "undefined" check (slot = `FFFF`) | ✘ byte compare `CMP DL,0FFh`: `DEF USR` address `&HxxFF` gives "Illegal function call" | ✔ word compare | ✔ word compare | ✔ word compare, both targets |
 | SAVE ,A | ✔ | ✔ | ✔ | ✔ |
 | SAVE ,P (protected: `FE` header, XOR-encoded; LIST/EDIT/PEEK/POKE/binary SAVE blocked) | ✔ | ✔ | ✔ own tokens | ✔ files interchangeable with 5.28 both ways |
 | EDIT line editor (D C S K I X H L A E Q) | ✔ | ✔ | full screen | ✔ MBASIC style |

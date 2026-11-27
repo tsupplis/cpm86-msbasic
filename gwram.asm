@@ -19,7 +19,7 @@ COMMENT	*
 
 	PUBLIC	HEDING,CERMSG
 
-HEDING:	DB	"Microsoft BASIC Version 5.50A"
+HEDING:	DB	"Microsoft BASIC Version 5.50B"
 	ACRLF	
 	DB	"Copyright 1977-2026 (C) by Microsoft"
 	ACRLF	
@@ -62,7 +62,7 @@ ENDIF
 	VAR	LINLEN,1	;console width
 	VAR	WDTFLG,1	;default width of SCRN:
 	VAR	SAVLEN,2	;used by BLOAD, BSAVE
-	VARI	CLKOK,0		;CP/M-86: non-zero if the BDOS has a clock (3.0+)
+	VARI	CLKOK,0		;CP/M-86: non-zero for BDOS clock services (version > 22h)
 	VARI	EDTFLG,0	;non-zero: next program line input is an EDIT
 	VAR	EDTLIN,2	;line being edited
 	VAR	EDTPOS,1	;EDIT cursor (index into BUF)
