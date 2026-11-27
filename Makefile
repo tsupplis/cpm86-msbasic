@@ -39,6 +39,10 @@ MODS    = gwmain gwdata gweval gwlist gwsts gwram gwinit \
           gio86 giodsk giotbl giolpt giotty oemio \
           ibmres itsa86 biboot
 
+ifeq ($(TARGET),rom)
+MODS := $(filter-out giodsk oemio biboot,$(MODS)) romdisk rawvol romio romboot
+endif
+
 INCS    = oem bintrp ibmres gio86u msdosu cfg
 
 OBJS    = $(addprefix $(BLD)/,$(addsuffix .obj,$(MODS)))
@@ -47,6 +51,13 @@ STAGED  = $(addprefix $(BLD)/,$(addsuffix .asm,$(MODS)) $(addsuffix .inc,$(INCS)
 .PHONY: all dos cpm objs exe prog run check dump refcheck compare accept test parity parity-run testall dist clean distclean FORCE
 .SUFFIXES:
 .SECONDARY:
+
+.PHONY: rom
+rom:
+	$(MAKE) --no-print-directory TARGET=rom build/rom/mbasic.rom
+
+$(BLD)/mbasic.rom: $(BLD)/mbasic86.exe tools/mkrom.py
+	python3 tools/mkrom.py $< $(BLD)/mbasic86.map $@
 
 all: dos cpm
 
@@ -62,7 +73,9 @@ exe: $(BLD)/mbasic86.exe
 
 # The program for the target: MBASIC86.COM on MS-DOS, MBASIC86.CMD on CP/M-86,
 # both made from the linked MBASIC86.EXE
-ifeq ($(TARGET),cpm)
+ifeq ($(TARGET),rom)
+PROG     = mbasic.rom
+else ifeq ($(TARGET),cpm)
 PROG     = mbasic86.cmd
 REFPROG  = ref/mbasic86.cmd
 else
@@ -100,8 +113,8 @@ $(BLD):
 # make DEBUG=1 enables the DEBUG code (error tracing in OEMIO).
 DEBUG   ?= 0
 $(BLD)/cfg.inc: FORCE | $(BLD)
-	if [ "$(TARGET)" = cpm ]; then c=1; s=0; else c=0; s=1; fi; \
-	 printf 'CPM86=%s\r\nSCP=%s\r\nDEBUG=%s\r\n' $$c $$s $(DEBUG) > $@.new; \
+	c=$(if $(filter cpm,$(TARGET)),1,0); s=$(if $(filter dos,$(TARGET)),1,0); \
+	 printf 'CPM86=%s\r\nSCP=%s\r\nDEBUG=%s\r\nROMBAS=%s\r\n' $$c $$s $(DEBUG) $(if $(filter rom,$(TARGET)),1,0) > $@.new; \
 	 if cmp -s $@.new $@; then rm -f $@.new; else mv $@.new $@; fi
 
 FORCE:
@@ -216,3 +229,14 @@ clean:
 	rm -rf build
 
 distclean: clean
+
+.PHONY: romtools
+romtools:
+	$(MAKE) --no-print-directory TARGET=dos build/dos/romxfer.exe
+	$(MAKE) --no-print-directory TARGET=cpm build/cpm/romxfer.cmd
+
+$(BLD)/romxfer.exe: $(BLD)/romxfer.obj $(BLD)/rawvol.obj
+	cd $(BLD) && $(PTY) $(LINK) 'romxfer+rawvol,romxfer.exe,romxfer.map /M;'
+
+$(BLD)/romxfer.cmd: $(BLD)/romxfer.exe tools/mkcmd.py
+	python3 tools/mkcmd.py $< $(BLD)/romxfer.map $@

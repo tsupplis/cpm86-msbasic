@@ -222,12 +222,20 @@ DSEG	ENDS
 	MOV	DX,OFFSET $MERGE	;Is it MERGE?
 	CMP	AL,DL		;Test
 	JNZ	SHORT NTCHNM	;NO
+IF ROMBAS
+	JMP FCERR		;MERGE requires an ASCII source file
+ENDIF
 	MOV	BYTE PTR MRGFLG,AL	;Set MERGE flag
 	INC	BX
 NTCHNM:	DEC	BX		;Rescan file name
 	CALL	CHRGTR
+IF ROMBAS
+	EXTRN ROMCHOP:NEAR,ROMCHLD:NEAR,ROMCHSZ:NEAR
+	CALL ROMCHOP		;Verify the raw program before altering variables
+ELSE
 	EXTRN	PRGFLI:NEAR
 	CALL	PRGFLI		;Evaluate file name and OPEN it
+ENDIF
 	PUSH	BX		;Save text pointer
 	MOV	BX,0		;Get zero
 	MOV	CHNLIN,BX	;Assume no CHAIN line #
@@ -270,7 +278,11 @@ NTLINF:	CALL	SYNCHR
 	JMP	SNERR		;No, give error
 ??L003:
 	OR	AL,AL		;Flag to goto DNCMDA
-CHMWDL:	PUSHF			;Save ALL flag
+CHMWDL:
+IF ROMBAS
+	JMP FCERR		;DELETE is part of CHAIN MERGE
+ENDIF
+	PUSHF			;Save ALL flag
 	MOV	BYTE PTR MDLFLG,AL	;Set MERGE w/ DELETE
 	CALL	CHRGTR		;Get char after comma
 	CALL	SCNLIN		;Scan line range
@@ -587,6 +599,9 @@ DNCCLS:
 	MOV	TEMP9,BX	;Save here
 	MOV	BX,FRETOP	;Destination of high byte
 	MOV	SAVFRE,BX	;Save FRETOP to restore later
+IF ROMBAS
+	CALL ROMCHSZ		;Will the program fit below the preserved variables?
+ENDIF
 	CALL	BLTUC		;Move stuff up
 	MOV	BX,CX		;Now adjust top of memory below saved vars
 	DEC	BX		;One lower to be sure
@@ -607,6 +622,9 @@ DNCCLS:
 ; Step 6 - load new program
 NTMDLT:	MOV	AL,LOW 1	;Set CHAIN flag
 	MOV	BYTE PTR CHNFLG,AL
+IF ROMBAS
+	JMP ROMCHLD
+ELSE
 	EXTRN	CHNENT:NEAR,OKGETM:NEAR
 	MOV	AL,BYTE PTR MRGFLG	;MERGEing?
 	OR	AL,AL		;Set cc'S
@@ -614,6 +632,7 @@ NTMDLT:	MOV	AL,LOW 1	;Set CHAIN flag
 	JMP	OKGETM		;Do MERGE
 ??L013:
 	JMP	CHNENT		;Jump to LOAD code
+ENDIF
 ; Step 7 - Move stuff back down
 	PUBLIC	CHNRET
 CHNRET:

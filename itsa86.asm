@@ -143,7 +143,7 @@ MAXRQ1:	MOV	BX,AX
 	PUSH	BX		;Return address (BX saved by CLEARC)
 
 ;Set up program segment prefix
-IFE	CPM86
+IFE	CPM86 OR ROMBAS
 	MOV	DX,DS
 	MOV	AH,LOW 38D	;Function ^H26
 	INT	33D		;MSDOS function request
@@ -178,7 +178,7 @@ CSEND:
 ;         MSWSIZ = Highest memory address (future MAXMEM)
 ;
 MAPCLC:
-IF	CPM86
+IF	CPM86 OR ROMBAS
 	MOV	DX,DS		;CP/M-86: the data group stays where it was loaded
 ELSE
 ;NEWDS = CS: + paragraphs of resident code (everything before CSEND)

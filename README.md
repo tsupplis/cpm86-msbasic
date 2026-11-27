@@ -142,6 +142,91 @@ limit (`tests/accept/parity`).
 | `tests/` | scripts (`\k` ^C, `\e` ESC, `\^X` control keys, first line `#args:` = command line, `NAME.bas` companion file), `accept/` reviewed differences |
 | `examples/` | `ivtdump.bas`: 8086 interrupt vector table (`DEF SEG=0`, `PEEK`); `pspdump.bas`: MS-DOS PSP / CP/M-86 base page at BASIC's DS:0 (`DEF SEG`, `PEEK`); `beep.bas`: PC speaker beep (`OUT`, `INP`, PC hardware only). emu2 shows placeholder vectors; real values on real hardware |
 
+### IBM PC standalone ROM
+
+`make rom` builds `build/rom/mbasic.rom`, a 32 KiB text BASIC for the IBM
+Cassette BASIC window at physical F6000h–FDFFFh. The BIOS enters it through
+INT 18h. In the PCE XT configuration, substitute this file for
+`ibm-basic-1.10.rom` and leave the system BIOS in place. The target requires
+at least 16 KiB conventional RAM. IBM DOS BASICA compatibility is untested.
+
+The floppy is a read-mostly program library. Prepare a sector-formatted
+disk in A: at the ROM's `Ok` prompt with `INIT 320` or `INIT 720`;
+plain `INIT` selects 320 KiB. Type `YES` to replace the directory.
+Initialization writes the volume header and an empty directory. It requires
+a drive and BIOS that can read the selected geometry. `INIT` is a literal
+console command, with no BASIC token or program statement.
+
+On the host, `python3 tools/mkraw.py programs.img` creates a new 320 KiB
+image. Add `--size 720` for 720 KiB. The resulting floppy can stay in A:
+at power-on because its boot sector invokes INT 18h.
+
+```basic
+10 PRINT 7*11
+SAVE "DEMO"
+NEW
+FILES
+RUN "DEMO"
+```
+
+`SAVE` appends a tokenized program. `LOAD` and named `RUN` use the latest
+committed version. `FILES` lists each current name once. Use a quoted name of
+1–12 printable non-space ASCII characters, excluding quotes. Names ignore case.
+`CHAIN "NEXT"` runs a saved program and carries variables declared in
+`COMMON` into it. The name may also be a string expression. For example,
+`CHAIN "NEXT",100` starts at line 100 and `CHAIN "NEXT",,ALL` retains all
+variables. The ROM stores tokenized programs, so `CHAIN MERGE` and its
+`DELETE` option report `Illegal function call`.
+
+Writing is cassette-style: each save appends to the end, including when the
+name already exists. Earlier versions continue to occupy space. A full disk reports `Disk full`.
+A readable disk with a missing or unknown signature gives `Device Unavailable`
+on `SAVE`, `LOAD`, named `RUN`, `CHAIN`, and `FILES`. Only confirmed
+`INIT` creates a volume. BASIC programs can use inline `DATA` and `READ`.
+External data-file I/O (`OPEN`, `INPUT #`, `PRINT #`, random records),
+rename, delete and ASCII or protected saves are unavailable.
+
+**Preparing a library under DOS or CP/M-86.** Build both assembly utilities
+with `make romtools`. Run `build/dos/romxfer.exe` or
+`build/cpm/romxfer.cmd` on an IBM PC with two floppy drives. OS files
+are on A: and the raw library disk is in physical B:. For example:
+
+```text
+ROMXFER INIT 320
+ROMXFER PUT HELLO.BAS HELLO
+ROMXFER GET HELLO COPY.BAS
+```
+
+Use ordinary tokenized files produced by BASIC-86's `SAVE "HELLO.BAS"`.
+`PUT` appends a revision. `GET` checks its CRC and requires a new
+output filename. Move the library disk to A: when using the ROM.
+
+| BASIC operation | ROM implementation |
+|---|---|
+| Console output | BIOS INT 10h, AH=0Eh |
+| Keyboard read and poll | BIOS INT 16h, AH=00h and 01h |
+| Printer output | BIOS INT 17h, AH=00h, printer 0 |
+| Startup memory sizing | BIOS INT 12h |
+| Program storage on A: | BIOS INT 13h, AH=02h read, 03h write, 00h reset on retry |
+
+Sector zero contains `MSBASRAW` at offset 8. The byte at offset 16 selects
+the geometry: 1 for 320 KiB (40 cylinders, 2 heads, 8 sectors per track)
+or 2 for 720 KiB (80, 2, 9). Both use 512-byte sectors.
+Each record starts with a header sector containing `BAS1`, a 12-byte
+zero-padded name, then four little-endian words holding the payload length,
+payload CRC, original BASIC program base and header CRC. CRC-16 uses polynomial
+A001h and initial value FFFFh. The header CRC covers its first 22 bytes.
+The payload occupies consecutive sectors. An all-zero header ends the log.
+SAVE writes the payload and next end marker before committing the header.
+LOAD verifies the payload before replacing the program in RAM.
+
+Run the standalone PCE checks after building with
+`python3 tests/rompce.py ../cpm86-hacking/cpm86.cfg`. They use the IBM XT
+11/08/82 BIOS and temporary floppy images. To test the transfer utility, use
+`python3 tests/xferpce.py ../cpm86-hacking/cpm86.cfg dos boot.img`
+(or `cpm`). Supply a boot disk with the matching MBASIC86 and ROMXFER builds
+on A:. The test uses a copy and a disposable raw floppy.
+
 ## 7. Possible evolution
 
 | Idea | Note |

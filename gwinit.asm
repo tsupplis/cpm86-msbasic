@@ -68,6 +68,9 @@ INIT:
 ; segment.  The beginning of DATASG MUST be within 64K of the beginning
 ; of CODESG for this to work.  No error will be generated, so be careful.
 ;
+IF	ROMBAS
+	MOV	DX,DS		;ROM startup has selected RAM and set CPMMEM
+ELSE
 IF	CPM86
 ;CP/M-86 loaded the data group at DS, with the base page at DS:0.  The word at
 ; last paragraph of the data group goes to CPMMEM (not into the base page).
@@ -108,6 +111,7 @@ DSEG	ENDS
 				;            & some may not be words
 	INS86	220,243,CPMEXT+2	;NOP         NOP - pad to item 3 of INS86
 				;MOV  CPMEXT+2,AX
+ENDIF
 ENDIF
 	CLI			;Setting the stack segment and stack
 				;pointer must be an indivisable
@@ -189,6 +193,7 @@ DSEG	SEGMENT PUBLIC 'DATASG'
 DSEG	ENDS
 	MOV	BX,OFFSET DSEGZ	;IN THE DATA SEGMENT
 	MOV	TEMP8,BX	;SO IF RE-INITAILIZE OK
+IFE	ROMBAS
 IF	CPM86
 ;Parse a copy of the command tail (base page 80h-FFh) in the upper half of
 ; BUF, above the start-up stack, so the base page stays as CP/M-86 built it.
@@ -323,6 +328,7 @@ GETVAL:	CALL	CHRGTR		;skip M,F or S
 	CALL	SYNCHR
 	DB	OFFSET ":"	;MAKE SURE COLON FOLLOWS
 	JMP	CNSGET		;[DE]=VALUE FOLLOWING COLON
+ENDIF
 DSEG	SEGMENT PUBLIC 'DATASG'
 	EXTRN	TEMP8:WORD	;POINTER TO BASIC LOAD FILE
 DSEG	ENDS
