@@ -220,12 +220,12 @@ dump: prog
 run: prog
 	cd $(BLD) && emu2 $(PROG)
 
-# Flat archive (no directories): our two builds, the 5.28 / 5.22 / 5.21 / 4.51
+# Flat archive (no directories): our three builds, the 5.28 / 5.22 / 5.21 / 4.51
 # reference binaries under 8.3 names and the license
-dist: all
+dist: all rom
 	rm -rf build/dist build/mbasic.zip
 	mkdir -p build/dist
-	cp build/dos/mbasic86.com build/cpm/mbasic86.cmd LICENSE.md build/dist/
+	cp build/dos/mbasic86.com build/cpm/mbasic86.cmd build/rom/mbasic.rom LICENSE.md build/dist/
 	cp ref/mbasic86.com build/dist/mbas528.com
 	cp ref/mbasic86.cmd build/dist/mbas522.cmd
 	cp ref/mbas521.com ref/obas451.com build/dist/
