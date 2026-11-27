@@ -101,6 +101,12 @@ ENDM
 
 	ROFFST	DATOFS,DATPSC	;Operating System interface buffer
 	ROFFST	FD_SIZ,2	;variable record length for random files
+IF	CPM86
+	ROFFST	FD_BC,1	;last-record byte counts enabled for this file
+	ROFFST	FD_RFIX,1	;random write filled or extended a partial record
+	ROFFST	FD_TAIL,1	;valid bytes in partial last record, zero for full
+	ROFFST	FD_END,3	;record immediately after that partial record
+ENDIF
 	ROFFST	FD_PHY,2	;current physical record number
 	ROFFST	FD_LOG,2	;current logical record number
 	ROFFST	F_NUL5,1	;Future use

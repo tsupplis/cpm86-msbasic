@@ -52,6 +52,7 @@ NAME	LABEL	WORD
 ENDM
 
 IF	CPM86
+	VARI	BCOK,0		;FCB last-record byte count supported
 	VAR	CPMMEM,2	;last paragraph of the data group (the base
 				;page is left as CP/M-86 built it)
 ENDIF

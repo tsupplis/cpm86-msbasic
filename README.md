@@ -55,6 +55,21 @@ Quick start-up checks (banner, `FILES`, program entry) on PCE/ibmpc; not an exte
 | Any 8086/8088 machine | ✔ | No BIOS, video or port access by the interpreter |
 | emu2-cpm86 (DOS and CP/M-86) | ✔ fully tested | All `tests/` run here |
 
+**CP/M file lengths.** BASIC requests the final record's byte count on Concurrent
+CP/M 3.1 and later Concurrent DOS, Personal CP/M 2.0 and DOS Plus 1.2.
+Sequential writes store the count at close. After reopening, `LOF` includes
+the bytes BASIC wrote, including its final Ctrl-Z. Binary data ending in
+zero or Ctrl-Z is preserved. Random `GET` and `PUT` still transfer fixed
+records. CP/M-86 1.1, Concurrent CP/M 1.0 and unrecognized BDOS versions
+use 128-byte record lengths. A zero byte count denotes a full final record,
+including on older files with no recorded count. Text input still recognizes
+Ctrl-Z, and append retains that convention on these record-sized files.
+
+To check a guest, copy `tests/length.bas` as CP/M text and the current
+`MBASIC86.CMD` to a scratch disk. Run `RUN "LENGTH"` in BASIC and enter
+`1` for byte counts or `0` for record lengths. A successful run prints
+`LENGTH PASS`.
+
 On the tested clock-capable guests, `DATE$` accepts dates from 1978 through
 2099. BDOS day 1 is January 1, 1978. `TIME$` reads hours, minutes and
 seconds. Setting either value writes the combined BDOS timestamp: a date
@@ -251,7 +266,6 @@ on A:. The test uses a copy and a disposable raw floppy.
 |---|---|
 | Extensive testing on real DOS 1.10 / CP/M-86 1.1 / Concurrent DOS | start-up checked, full `tests/` not yet run there |
 | LINK 5.10b | currently rejects the object set; LINK 3.65a used |
-| Exact file lengths on CP/M 3 (LRBC) | binary files end on 128-byte records today |
 | 8087 support, more devices | only if it stays OS-generic |
 
 ## 8. Fun facts and quirks (found in the 1983 code)
