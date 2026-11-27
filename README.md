@@ -4,7 +4,9 @@ A text-mode Microsoft BASIC interpreter rebuilt from the 1983 GW-BASIC sources s
 graphics and PC hardware removed, tokens and behaviour aligned on MBASIC 5.28/ MBASIC-86 5.22.
 one source tree producing an MS-DOS `.COM` and a CP/M-86 `.CMD`.
 
-A similar  but far more advanced approach can also be found at [gw-basic-2026](https://github.com/evvaletov/gw-basic-2026). If you intent to work on *nix and more recent ms-dos environment, have a look at it.
+GW-BASIC is also integrated to the companion project [msdos40-kernel](https://github.com/tsupplis/msdos40-kernel) with the explicit goal to be a 3.23 compatible replacement.
+
+A similar but far more advanced approach can also be found at [gw-basic-2026](https://github.com/evvaletov/gw-basic-2026). If you intent to work on *nix and more recent ms-dos environment, have a look at it.
 
 Another interesting project is [mbasic 5.21 reconstruction](https://github.com/avwohl/mbasic2025).
 
